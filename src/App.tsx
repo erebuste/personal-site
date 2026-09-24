@@ -52,8 +52,8 @@ export default function App({ profile, views }: Props) {
         >
           <ProfileCard user={user} box={box} theme={theme} views={page.showViews ? views : undefined}>
             <SocialLinks links={links} theme={theme} />
+            {showcases.length > 0 && <Showcases items={showcases} box={box} theme={theme} />}
           </ProfileCard>
-          {showcases.length > 0 && <Showcases items={showcases} box={box} theme={theme} />}
           {discordPresence.enabled && <DiscordPresence userId={discordPresence.userId} box={box} theme={theme} />}
         </main>
       ) : (

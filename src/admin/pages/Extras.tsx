@@ -251,7 +251,7 @@ export function ShowcasesPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Showcases" description={`${draft.showcases.length} of 12 used · image cards under your profile card`} />
+      <PageHeader title="Showcases" description={`${draft.showcases.length} of 12 used · a Showcases button on your card opens them in a popup`} />
 
       <Section title="Your showcases">
         {draft.showcases.length === 0 ? (
