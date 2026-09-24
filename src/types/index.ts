@@ -40,7 +40,9 @@ const int = (min: number, max: number) => z.number().int().min(min).max(max);
 const media = z
   .string()
   .max(500)
-  .regex(/^(\/(?!\/)|https:\/\/)/, 'must be a /path or https:// URL');
+  .regex(/^(\/(?!\/)|https:\/\/)/, 'must be a /path or https:// URL')
+  // The server builds og:image with new URL(); an unparseable one would make every page render throw.
+  .refine((s) => s.startsWith('/') || URL.canParse(s), 'must be a valid URL');
 /** http(s) only, so links can't carry javascript: URLs. */
 const httpUrl = z
   .string()

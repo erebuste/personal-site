@@ -98,25 +98,54 @@ const toLink = (f: LinkForm): SocialLink => ({
   action: f.type === 'url' ? { type: 'url', href: f.value.trim() } : { type: 'copy', value: f.value },
 });
 
-export function LinksPage() {
-  const { draft, commit, notify } = useAdmin();
+/** Which row is being edited, its form, and a commit that notifies and resets the form on success. */
+function useListEditor<F>(empty: F) {
+  const { commit, notify } = useAdmin();
   const [editing, setEditing] = useState<number | null>(null);
-  const [form, setForm] = useState<LinkForm>(EMPTY_LINK);
+  const [form, setForm] = useState<F>(empty);
   const [busy, setBusy] = useState(false);
-  const set = (patch: Partial<LinkForm>) => setForm((f) => ({ ...f, ...patch }));
   const cancel = () => {
     setEditing(null);
-    setForm(EMPTY_LINK);
+    setForm(empty);
   };
+  return {
+    editing,
+    form,
+    busy,
+    cancel,
+    set: (patch: Partial<F>) => setForm((f) => ({ ...f, ...patch })),
+    edit: (i: number, value: F) => {
+      setEditing(i);
+      setForm(value);
+    },
+    run: async (recipe: Parameters<typeof commit>[0], done: string) => {
+      setBusy(true);
+      if (await commit(recipe)) {
+        notify(done);
+        cancel();
+      }
+      setBusy(false);
+    },
+  };
+}
 
-  const run = async (recipe: Parameters<typeof commit>[0], done: string) => {
-    setBusy(true);
-    if (await commit(recipe)) {
-      notify(done);
-      cancel();
-    }
-    setBusy(false);
-  };
+/** Edit and delete buttons at the end of a list row. */
+function RowActions({ label, busy, onEdit, onDelete }: { label: string; busy: boolean; onEdit: () => void; onDelete: () => void }) {
+  return (
+    <>
+      <Button tone="ghost" small aria-label={`Edit ${label}`} onClick={onEdit}>
+        <Pencil className="size-3.5" />
+      </Button>
+      <Button tone="ghost" small aria-label={`Delete ${label}`} disabled={busy} className="hover:text-adm-danger" onClick={onDelete}>
+        <Trash2 className="size-3.5" />
+      </Button>
+    </>
+  );
+}
+
+export function LinksPage() {
+  const { draft, notify } = useAdmin();
+  const { editing, form, busy, set, edit, cancel, run } = useListEditor(EMPTY_LINK);
 
   const submit = () => {
     if (!form.value.trim()) return notify(form.type === 'url' ? 'URL is required.' : 'Text is required.', 'error');
@@ -147,27 +176,12 @@ export function LinksPage() {
                     {link.action.type === 'url' ? link.action.href : `Copies “${link.action.value}”`}
                   </p>
                 </div>
-                <Button
-                  tone="ghost"
-                  small
-                  aria-label={`Edit ${link.title}`}
-                  onClick={() => {
-                    setEditing(i);
-                    setForm(toForm(link));
-                  }}
-                >
-                  <Pencil className="size-3.5" />
-                </Button>
-                <Button
-                  tone="ghost"
-                  small
-                  aria-label={`Delete ${link.title}`}
-                  disabled={busy}
-                  className="hover:text-adm-danger"
-                  onClick={() => void run((d) => void d.links.splice(i, 1), 'Link deleted')}
-                >
-                  <Trash2 className="size-3.5" />
-                </Button>
+                <RowActions
+                  label={link.title}
+                  busy={busy}
+                  onEdit={() => edit(i, toForm(link))}
+                  onDelete={() => void run((d) => void d.links.splice(i, 1), 'Link deleted')}
+                />
               </li>
             ))}
           </ul>
@@ -219,24 +233,8 @@ type ShowcaseForm = { title: string; description: string; image: string | null; 
 const EMPTY_SHOWCASE: ShowcaseForm = { title: '', description: '', image: null, href: '' };
 
 export function ShowcasesPage() {
-  const { draft, commit, notify } = useAdmin();
-  const [editing, setEditing] = useState<number | null>(null);
-  const [form, setForm] = useState<ShowcaseForm>(EMPTY_SHOWCASE);
-  const [busy, setBusy] = useState(false);
-  const set = (patch: Partial<ShowcaseForm>) => setForm((f) => ({ ...f, ...patch }));
-  const cancel = () => {
-    setEditing(null);
-    setForm(EMPTY_SHOWCASE);
-  };
-
-  const run = async (recipe: Parameters<typeof commit>[0], done: string) => {
-    setBusy(true);
-    if (await commit(recipe)) {
-      notify(done);
-      cancel();
-    }
-    setBusy(false);
-  };
+  const { draft, notify } = useAdmin();
+  const { editing, form, busy, set, edit, cancel, run } = useListEditor(EMPTY_SHOWCASE);
 
   const submit = () => {
     const { image } = form;
@@ -265,27 +263,12 @@ export function ShowcasesPage() {
                   <p className="truncate text-sm font-medium">{item.title}</p>
                   <p className="truncate text-xs text-adm-muted">{item.href ?? 'No link'}</p>
                 </div>
-                <Button
-                  tone="ghost"
-                  small
-                  aria-label={`Edit ${item.title}`}
-                  onClick={() => {
-                    setEditing(i);
-                    setForm({ ...item, href: item.href ?? '' });
-                  }}
-                >
-                  <Pencil className="size-3.5" />
-                </Button>
-                <Button
-                  tone="ghost"
-                  small
-                  aria-label={`Delete ${item.title}`}
-                  disabled={busy}
-                  className="hover:text-adm-danger"
-                  onClick={() => void run((d) => void d.showcases.splice(i, 1), 'Showcase deleted')}
-                >
-                  <Trash2 className="size-3.5" />
-                </Button>
+                <RowActions
+                  label={item.title}
+                  busy={busy}
+                  onEdit={() => edit(i, { ...item, href: item.href ?? '' })}
+                  onDelete={() => void run((d) => void d.showcases.splice(i, 1), 'Showcase deleted')}
+                />
               </li>
             ))}
           </ul>

@@ -28,16 +28,21 @@ export function DiscordPresence({ box, theme }: Props) {
 
   useEffect(() => {
     const ctrl = new AbortController();
-    const load = () =>
+    // Skipped while the tab is hidden; refreshed as soon as it's visible again.
+    const load = () => {
+      if (document.hidden) return;
       fetch('/api/presence', { signal: ctrl.signal })
         .then((r) => (r.ok ? (r.json() as Promise<PresenceData>) : null))
         .then(setData)
         .catch(() => undefined); // aborted or offline: keep what we had
-    void load();
+    };
+    load();
     const id = setInterval(load, 30_000);
+    document.addEventListener('visibilitychange', load);
     return () => {
       ctrl.abort();
       clearInterval(id);
+      document.removeEventListener('visibilitychange', load);
     };
   }, []);
 
@@ -61,6 +66,8 @@ export function DiscordPresence({ box, theme }: Props) {
       <div className="relative shrink-0">
         <img src={avatar} alt="" width={64} height={64} className="size-16 rounded-full" />
         <span
+          role="img"
+          aria-label={STATUS[data.discord_status].label}
           className="absolute right-0.5 bottom-0.5 size-4 rounded-full border-3 border-[#141417]"
           style={{ backgroundColor: STATUS[data.discord_status].color }}
           title={STATUS[data.discord_status].label}

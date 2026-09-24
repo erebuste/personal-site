@@ -70,28 +70,31 @@ export function Showcases({ items, box, theme }: Props) {
       <dialog
         ref={dialog}
         aria-label="Showcases"
-        // Clicks on the dialog element itself (not its contents) land on the backdrop area.
+        // Clicks on the dialog element itself (not its contents) land on the backdrop area. Padding lives on the
+        // inner div, otherwise clicking the card's own padding would count as the dialog and close it.
         onClick={(e) => e.target === e.currentTarget && e.currentTarget.close()}
-        className="showcase-dialog m-auto max-h-[85dvh] overflow-y-auto p-4 text-left backdrop:bg-black/60 backdrop:backdrop-blur-sm"
+        className="showcase-dialog m-auto max-h-[85dvh] overflow-y-auto p-0 text-left backdrop:bg-black/60 backdrop:backdrop-blur-sm"
         style={{ ...boxStyle(box), width: 'calc(100% - 2rem)', maxWidth: 760 }}
       >
-        <div className="mb-3 flex items-center justify-between px-1">
-          <h2 className="text-base font-semibold" style={{ color: theme.primaryText }}>
-            Showcases
-          </h2>
-          <button
-            type="button"
-            aria-label="Close"
-            onClick={() => dialog.current?.close()}
-            className="cursor-pointer rounded-md p-1 transition hover:bg-white/10"
-          >
-            <X className="size-4" color={theme.secondaryText} />
-          </button>
-        </div>
-        <div className="grid gap-3 sm:grid-cols-2">
-          {items.map((item, i) => (
-            <Card key={i} item={item} theme={theme} />
-          ))}
+        <div className="p-4">
+          <div className="mb-3 flex items-center justify-between px-1">
+            <h2 className="text-base font-semibold" style={{ color: theme.primaryText }}>
+              Showcases
+            </h2>
+            <button
+              type="button"
+              aria-label="Close"
+              onClick={() => dialog.current?.close()}
+              className="cursor-pointer rounded-md p-1 transition hover:bg-white/10"
+            >
+              <X className="size-4" color={theme.secondaryText} />
+            </button>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {items.map((item, i) => (
+              <Card key={i} item={item} theme={theme} />
+            ))}
+          </div>
         </div>
       </dialog>
     </>

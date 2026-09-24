@@ -44,7 +44,11 @@ const clientIp = (c: Context) => c.req.header('x-real-ip') ?? 'direct';
 const attempts = new Map<string, { count: number; resetAt: number }>();
 function allowLoginAttempt(ip: string): boolean {
   const now = Date.now();
-  if (attempts.size > 10_000) attempts.clear();
+  if (attempts.size > 10_000) {
+    for (const [key, entry] of attempts) if (entry.resetAt < now) attempts.delete(key);
+    // ponytail: still full means >10k IPs guessing at once; they get 10 tries each anyway, so just reset.
+    if (attempts.size > 10_000) attempts.clear();
+  }
   const a = attempts.get(ip);
   if (!a || a.resetAt < now) {
     attempts.set(ip, { count: 1, resetAt: now + 15 * 60_000 });
@@ -89,6 +93,14 @@ const isUploadKind = (k: unknown): k is keyof typeof ALLOWED => typeof k === 'st
 // ---- routes ----
 
 const app = new Hono();
+
+// HSTS only once the site is on HTTPS (same switch as the secure cookie). Browsers apply it to the whole host,
+// so sending it on the pages and API is enough even though nginx serves the static files.
+if (SECURE_COOKIE)
+  app.use('*', async (c, next) => {
+    await next();
+    c.res.headers.set('Strict-Transport-Security', 'max-age=31536000');
+  });
 
 app.use('/api/*', csrf()); // rejects cross-origin form/multipart posts
 
@@ -161,7 +173,8 @@ app.post(
 
     // Random name + whitelisted extension; files are served with nosniff, so content can't be reinterpreted.
     const name = randomBytes(12).toString('hex') + ext;
-    await writeFile(join(UPLOAD_DIR, name), Buffer.from(await file.arrayBuffer()));
+    // Streamed from the parsed File, so the upload isn't copied into a second full-size Buffer first.
+    await writeFile(join(UPLOAD_DIR, name), file.stream());
     return c.json({ url: `/uploads/${name}` });
   },
 );
@@ -171,15 +184,20 @@ app.all('/api/*', (c) => c.json({ error: 'Not found.' }, 404));
 // nginx serves /uploads directly in production; this covers `npm run dev`.
 app.use('/uploads/*', serveStatic({ root: UPLOAD_DIR, rewriteRequestPath: (p) => p.replace(/^\/uploads/, '') }));
 
+// The only pages: the profile at / and the dashboard under /admin. Anything else is a real 404 (and no view).
+const isPage = (path: string) => path === '/' || /^\/admin(\/|$)/.test(path);
+
 let template: string | undefined;
 app.get('*', async (c) => {
+  if (!isPage(c.req.path)) return c.text('Not found', 404);
   template ??= await readFile(join(DIST, 'index.html'), 'utf8').catch(() => undefined);
   if (!template) return c.text('Frontend not built. Run `npm run build`, or use the Vite dev server.', 503);
 
   const ua = c.req.header('user-agent') ?? '';
   if (!c.req.path.startsWith('/admin') && !BOT_UA.test(ua) && !isAuthed(c)) countView(`${clientIp(c)}|${ua}`);
 
-  return c.html(template.replace('<!--app-head-->', headTags(getProfile())), 200, { 'Cache-Control': 'no-cache' });
+  // Function replacer: a string one would expand `$'`/`$&` in the title into chunks of the template.
+  return c.html(template.replace('<!--app-head-->', () => headTags(getProfile())), 200, { 'Cache-Control': 'no-cache' });
 });
 
 serve({ fetch: app.fetch, port: PORT }, (info) => console.log(`API listening on :${info.port}`));

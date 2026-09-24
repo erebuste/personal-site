@@ -67,10 +67,11 @@ export function SocialLinks({ links, theme }: Props) {
   return (
     <>
       <nav aria-label="Social links" className="mt-6 flex flex-wrap items-center justify-center gap-2.5">
-        {links.map(({ platform, title, action }) =>
+        {/* Index keys: titles aren't unique, and the list only changes on a page reload. */}
+        {links.map(({ platform, title, action }, i) =>
           action.type === 'url' ? (
             <a
-              key={title}
+              key={i}
               href={action.href}
               target="_blank"
               rel="noopener noreferrer"
@@ -83,7 +84,7 @@ export function SocialLinks({ links, theme }: Props) {
             </a>
           ) : (
             <button
-              key={title}
+              key={i}
               type="button"
               onClick={() => void copy(action.value, title)}
               title={`Copy ${title}`}

@@ -28,7 +28,16 @@ export function useAdmin(): AdminState {
   return state;
 }
 
-/** fetch + JSON with the server's `{ error }` message surfaced as the thrown Error. */
+/** A non-2xx response; `status` lets callers react to e.g. 401 without matching message text. */
+export class ApiError extends Error {
+  status: number;
+  constructor(message: string, status: number) {
+    super(message);
+    this.status = status;
+  }
+}
+
+/** fetch + JSON with the server's `{ error }` message surfaced as the thrown ApiError. */
 export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
   const headers = init.body instanceof FormData ? init.headers : { 'Content-Type': 'application/json', ...init.headers };
   const res = await fetch(path, { ...init, headers });
@@ -38,7 +47,7 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
       typeof body === 'object' && body !== null && 'error' in body && typeof body.error === 'string'
         ? body.error
         : `Request failed (${res.status})`;
-    throw new Error(message);
+    throw new ApiError(message, res.status);
   }
   return body as T;
 }

@@ -20,7 +20,7 @@ import { DashboardPage } from './pages/Dashboard';
 import { EmbedPage, LinksPage, ShowcasesPage, TracksPage } from './pages/Extras';
 import { OptionsPage } from './pages/Options';
 import { ProfilePage } from './pages/Profile';
-import { AdminContext, api, errorMessage, type AdminState, type Page } from './state';
+import { AdminContext, ApiError, api, errorMessage, type AdminState, type Page } from './state';
 import { Button, Field, Info, Logo, cx } from './ui';
 
 const NAV: { title: string; items: { page: Page; label: string; icon: LucideIcon }[] }[] = [
@@ -214,17 +214,15 @@ function Shell({ onLogout }: { onLogout: () => void }) {
 
   if (!saved || !draft) return <Backdrop>{toastEl}</Backdrop>;
 
-  const persist = async (next: ProfileConfig): Promise<boolean> => {
+  const persist = async (next: ProfileConfig): Promise<ProfileConfig | null> => {
     try {
       const stored = await api<ProfileConfig>('/api/admin/profile', { method: 'PUT', body: JSON.stringify(next) });
       setSaved(stored);
-      setDraft(stored);
-      return true;
+      return stored;
     } catch (e) {
-      const message = errorMessage(e);
-      notify(message, 'error');
-      if (message === 'Not logged in.') onLogout();
-      return false;
+      notify(errorMessage(e), 'error');
+      if (e instanceof ApiError && e.status === 401) onLogout();
+      return null;
     }
   };
 
@@ -234,11 +232,20 @@ function Shell({ onLogout }: { onLogout: () => void }) {
     dirty,
     page,
     update: (recipe) => setDraft((prev) => prev && produce(prev, recipe)),
-    commit: (recipe) => persist(produce(draft, recipe)),
+    // Built from `saved`, not `draft`: adding a link mustn't also publish unrelated unsaved edits.
+    // Pending edits stay in the draft (and the "Unsaved changes" bar) with the committed change applied on top.
+    commit: async (recipe) => {
+      const stored = await persist(produce(saved, recipe));
+      if (stored) setDraft((prev) => (prev && dirty ? produce(prev, recipe) : stored));
+      return stored !== null;
+    },
     save: async () => {
-      const ok = await persist(draft);
-      if (ok) notify('Changes saved');
-      return ok;
+      const stored = await persist(draft);
+      if (stored) {
+        setDraft(stored);
+        notify('Changes saved');
+      }
+      return stored !== null;
     },
     reset: () => setDraft(saved),
     upload: async (file, kind) => {

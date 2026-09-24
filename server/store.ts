@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { mkdir, readFile, rename, writeFile } from 'node:fs/promises';
+import { copyFile, mkdir, readdir, readFile, rename, rm, stat, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { z } from 'zod';
 import { defaultProfile } from '../src/config/profile.ts';
@@ -54,7 +54,10 @@ async function loadProfile(): Promise<ProfileConfig> {
   }
   const parsed = profileSchema.safeParse(withDefaults(defaultProfile, raw));
   if (parsed.success) return parsed.data;
-  console.error('data/profile.json failed validation; serving defaults until the next save.', parsed.error.issues);
+  // The next admin save overwrites profile.json with whatever the dashboard shows (the defaults), so keep a copy.
+  const backup = join(DATA_DIR, `profile.invalid-${Date.now()}.json`);
+  await copyFile(PROFILE_FILE, backup);
+  console.error(`data/profile.json failed validation; serving defaults, original kept at ${backup}.`, parsed.error.issues);
   return defaultProfile;
 }
 
@@ -65,6 +68,21 @@ export const getProfile = (): ProfileConfig => profile;
 export async function saveProfile(next: ProfileConfig): Promise<void> {
   await writeJson(PROFILE_FILE, next);
   profile = next;
+  pruneUploads(next).catch((e: unknown) => console.error('Failed to prune uploads', e));
+}
+
+// Uploads happen before the save that uses them, so a file the profile doesn't mention yet may be sitting in an
+// unsaved draft. Only files unreferenced for a day are deleted.
+const UPLOAD_GRACE_MS = 86_400_000;
+
+/** Deletes uploads the saved profile no longer references (replaced avatars, removed showcases, old tracks). */
+async function pruneUploads(saved: ProfileConfig): Promise<void> {
+  const json = JSON.stringify(saved);
+  for (const entry of await readdir(UPLOAD_DIR, { withFileTypes: true })) {
+    if (!entry.isFile() || json.includes(`/uploads/${entry.name}`)) continue;
+    const file = join(UPLOAD_DIR, entry.name);
+    if (Date.now() - (await stat(file)).mtimeMs > UPLOAD_GRACE_MS) await rm(file);
+  }
 }
 
 // ---- views ----
@@ -75,11 +93,13 @@ const views = viewsSchema.catch({ total: 0, days: {} }).parse(await readJson(VIE
 const today = () => new Date().toISOString().slice(0, 10);
 const seen = new Set<string>();
 let seenDay = today();
+let saveTimer: ReturnType<typeof setTimeout> | undefined;
 
 /** One view per visitor (ip + user agent) per UTC day. */
 export function countView(visitor: string): void {
   const day = today();
-  if (day !== seenDay) {
+  // The user agent is attacker-controlled, so cap the set; worst case a visitor is counted twice that day.
+  if (day !== seenDay || seen.size >= 100_000) {
     seen.clear();
     seenDay = day;
   }
@@ -88,7 +108,11 @@ export function countView(visitor: string): void {
   seen.add(key);
   views.total++;
   views.days[day] = (views.days[day] ?? 0) + 1;
-  writeJson(VIEWS_FILE, views).catch((e: unknown) => console.error('Failed to save views', e));
+  // One write per 5s at most instead of one per new visitor. ponytail: a crash loses up to 5s of views.
+  saveTimer ??= setTimeout(() => {
+    saveTimer = undefined;
+    writeJson(VIEWS_FILE, views).catch((e: unknown) => console.error('Failed to save views', e));
+  }, 5_000);
 }
 
 export function stats(): StatsResponse {
