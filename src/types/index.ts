@@ -17,7 +17,23 @@ export const PLATFORMS = [
   'telegram',
 ] as const;
 
-export const CURSOR_TRAILS = ['none', 'fairy-dust', 'bubbles', 'snow', 'rainbow', 'ghost', 'follow', 'emoji'] as const;
+export const CURSOR_TRAILS = [
+  'none',
+  'fairy-dust',
+  'bubbles',
+  'snow',
+  'rainbow',
+  'ghost',
+  'follow',
+  'emoji',
+  'hearts',
+  'stars',
+  'fire',
+  'comet',
+  'matrix',
+  'ripple',
+  'confetti',
+] as const;
 export const PAGE_OVERLAYS = [
   'none',
   'glitch',
@@ -55,8 +71,37 @@ export const ENTER_ANIMATIONS = [
   'unfold',
   'glitch-in',
 ] as const;
-export const TITLE_ANIMATIONS =['none', 'typing', 'scroll', 'blink', 'wave', 'glitch', 'decrypt', 'sparkle'] as const;
-export const USERNAME_EFFECTS =['none', 'glow', 'neon', 'rainbow', 'shimmer', 'glitch', 'wave', 'typewriter'] as const;
+export const TITLE_ANIMATIONS = [
+  'none',
+  'typing',
+  'scroll',
+  'blink',
+  'wave',
+  'glitch',
+  'decrypt',
+  'sparkle',
+  'bounce',
+  'dots',
+  'spinner',
+  'heartbeat',
+  'reveal',
+] as const;
+export const USERNAME_EFFECTS = [
+  'none',
+  'glow',
+  'neon',
+  'rainbow',
+  'shimmer',
+  'glitch',
+  'wave',
+  'typewriter',
+  'fire',
+  'pulse',
+  'chromatic',
+  'outline',
+  'float',
+  'retro',
+] as const;
 
 const hex = z.string().regex(/^#[0-9a-fA-F]{6}$/, 'must be a #rrggbb color');
 const pct = z.number().int().min(0).max(100);

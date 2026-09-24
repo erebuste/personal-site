@@ -44,6 +44,11 @@ const TITLE_LABELS: Record<TitleAnimation, string> = {
   glitch: 'Glitch',
   decrypt: 'Decrypt',
   sparkle: 'Sparkle',
+  bounce: 'Bounce',
+  dots: 'Loading Dots',
+  spinner: 'Spinner',
+  heartbeat: 'Heartbeat',
+  reveal: 'Center Reveal',
 };
 const TRAIL_LABELS: Record<CursorTrail, string> = {
   none: 'None',
@@ -54,6 +59,13 @@ const TRAIL_LABELS: Record<CursorTrail, string> = {
   ghost: 'Ghost Trail',
   follow: 'Follow Ring',
   emoji: 'Emoji',
+  hearts: 'Hearts',
+  stars: 'Stars',
+  fire: 'Fire',
+  comet: 'Comet',
+  matrix: 'Matrix',
+  ripple: 'Ripples',
+  confetti: 'Confetti',
 };
 const EFFECT_LABELS: Record<UsernameEffect, string> = {
   none: 'None',
@@ -64,6 +76,12 @@ const EFFECT_LABELS: Record<UsernameEffect, string> = {
   glitch: 'Glitch',
   wave: 'Wave',
   typewriter: 'Typewriter',
+  fire: 'Fire',
+  pulse: 'Pulse',
+  chromatic: 'Chromatic Split',
+  outline: 'Outline',
+  float: 'Float',
+  retro: 'Retro Shadow',
 };
 const TITLE_OPTIONS = TITLE_ANIMATIONS.map((value) => ({ value, label: TITLE_LABELS[value] }));
 const TRAIL_OPTIONS = CURSOR_TRAILS.map((value) => ({ value, label: TRAIL_LABELS[value] }));

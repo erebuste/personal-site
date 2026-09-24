@@ -474,6 +474,43 @@ body {
 }
 @keyframes fx-blink { 50% { opacity: 0; } }
 
+/* Fire: layered warm glow licking upwards. */
+.fx-fire { animation: fx-fire 1.1s ease-in-out infinite alternate; }
+@keyframes fx-fire {
+  from { text-shadow: 0 0 4px rgb(255 255 255 / 0.2), 0 -2px 6px #ffd24a, 0 -5px 12px #ff8a1d, 0 -9px 20px #e2361b; }
+  to { text-shadow: 0 0 4px rgb(255 255 255 / 0.2), 0 -3px 8px #ffd24a, 0 -7px 16px #ff8a1d, 0 -12px 26px #e2361b; }
+}
+
+/* Pulse: breathes in size with an accent glow at the peak. */
+.fx-pulse { display: inline-block; animation: fx-pulse 1.8s ease-in-out infinite; }
+@keyframes fx-pulse { 50% { transform: scale(1.08); text-shadow: 0 0 14px var(--fx-accent); } }
+
+/* Chromatic: red/cyan split that drifts apart and back. */
+.fx-chromatic { animation: fx-chromatic 2.4s ease-in-out infinite; }
+@keyframes fx-chromatic {
+  0%, 100% { text-shadow: -1.5px 0 rgb(255 0 80 / 0.8), 1.5px 0 rgb(0 220 255 / 0.8); }
+  50% { text-shadow: -3px 1px rgb(255 0 80 / 0.8), 3px -1px rgb(0 220 255 / 0.8); }
+}
+
+/* Outline: hollow accent-stroked letters that slowly fill in and empty again. */
+.fx-outline {
+  color: transparent;
+  -webkit-text-stroke: 1px var(--fx-accent);
+  animation: fx-outline 3.2s ease-in-out infinite;
+}
+@keyframes fx-outline { 50% { color: var(--fx-accent); } }
+
+/* Float: gently bobs up and down. */
+.fx-float { display: inline-block; animation: fx-float 3s ease-in-out infinite; }
+@keyframes fx-float { 50% { transform: translateY(-4px); } }
+
+/* Retro: stacked offset shadows in the accent, like 80s title cards. */
+.fx-retro {
+  text-shadow: 2px 2px 0 var(--fx-accent), 4px 4px 0 rgb(0 0 0 / 0.45);
+  animation: fx-retro 2.5s ease-in-out infinite;
+}
+@keyframes fx-retro { 50% { text-shadow: 3px 3px 0 var(--fx-accent), 6px 6px 0 rgb(0 0 0 / 0.45); } }
+
 /* Admin sliders: gradient-filled track up to --fill (set inline), white thumb with a violet halo. */
 .fc-range {
   appearance: none;

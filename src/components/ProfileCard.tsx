@@ -45,8 +45,8 @@ export function Username({ text, effect, theme }: { text: string; effect: Userna
   );
 }
 
-/** Effects that paint the text with a gradient; a text-shadow behind transparent glyphs looks muddy. */
-const GRADIENT_EFFECTS: UsernameEffect[] = ['rainbow', 'shimmer'];
+/** Effects with transparent glyphs (gradient fill or outline only); a text-shadow behind them looks muddy. */
+const GRADIENT_EFFECTS: UsernameEffect[] = ['rainbow', 'shimmer', 'outline'];
 
 const SPARKLES = [
   { left: '-14%', top: '-10%', delay: '0s' },

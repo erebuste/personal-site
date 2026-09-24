@@ -8,6 +8,8 @@ const BLANK = '⠀'; // braille blank: renders empty but isn't trimmed away
 const GLYPHS = '!<>-_\\/[]{}=+*^?#$%&@';
 const glyph = () => GLYPHS[Math.floor(Math.random() * GLYPHS.length)] ?? '#';
 const repeat = <T,>(value: T, times: number): T[] => Array<T>(times).fill(value);
+/** A frame that's only spaces would show the URL, so swap it for the blank. */
+const notBlank = (frame: string) => (frame.trim() ? frame : BLANK);
 
 /** Toggle the case of one character, leaving the rest as written. */
 const flipCase = (ch: string) => (ch === ch.toUpperCase() ? ch.toLowerCase() : ch.toUpperCase());
@@ -51,6 +53,30 @@ export const TITLE_FRAMES: Record<Exclude<TitleAnimation, 'none'>, (title: strin
   },
 
   sparkle: (title) => [`✦ ${title} ✦`, `✧ ${title} ✧`, `⋆ ${title} ⋆`, `✧ ${title} ✧`],
+
+  // Slides right and back, padded with blanks the tab won't trim.
+  bounce: (title) => {
+    const steps = [0, 1, 2, 3, 4, 5, 6, 5, 4, 3, 2, 1];
+    return steps.map((n) => BLANK.repeat(n) + title);
+  },
+
+  dots: (title) => [title, `${title}.`, `${title}..`, `${title}...`],
+
+  spinner: (title) => ['◐', '◓', '◑', '◒'].map((c) => `${c} ${title}`),
+
+  // Lub-dub, then a pause.
+  heartbeat: (title) => [`♥ ${title}`, `♡ ${title}`, `♥ ${title}`, ...repeat(`♡ ${title}`, 4)],
+
+  // Grows out from the middle, holds, then shrinks back into it.
+  reveal: (title) => {
+    const chars = [...title];
+    const n = chars.length;
+    const grow = chars.map((_, i) => {
+      const start = Math.floor((n - (i + 1)) / 2);
+      return notBlank(chars.slice(start, start + i + 1).join(''));
+    });
+    return [...grow, ...repeat(title, 5), ...grow.slice(0, -1).reverse()];
+  },
 };
 
 /** The current frame of the chosen animation (or the plain title for 'none'). */

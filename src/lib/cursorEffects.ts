@@ -74,6 +74,10 @@ const glyph = (char: string, color: string) => (ctx: Ctx, p: Particle) => {
 };
 
 const RAINBOW = ['#fe0000', '#fd8c00', '#ffe500', '#119f0b', '#0644b3', '#c22edc'];
+const CONFETTI = ['#ff5f6d', '#ffc371', '#47e891', '#3fa7ff', '#b16cff', '#ffffff'];
+const KATAKANA = [...'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホ01'];
+/** A stable per-particle choice, seeded by the fractional part of its random `size`. */
+const pick = (list: string[], seed: number): string => list[Math.floor((seed % 1) * list.length)] ?? '#fff';
 
 // Record over the union: adding a trail to the schema without implementing it is a type error.
 export const CURSOR_EFFECTS: Record<Exclude<CursorTrail, 'none'>, (color: string, emoji: string) => CursorEffect> = {
@@ -161,4 +165,98 @@ export const CURSOR_EFFECTS: Record<Exclude<CursorTrail, 'none'>, (color: string
       ctx.arc(cursor.x, cursor.y, 2.5, 0, Math.PI * 2);
       ctx.fill();
     }),
+
+  hearts: (color) =>
+    particles(
+      (x, y) => ({ x, y, vx: rand(-0.5, 0.5), vy: rand(-1.4, -0.6), life: 1, size: rand(10, 16), decay: 0.016 }),
+      glyph('♥', color),
+      -0.01,
+      3,
+    ),
+
+  stars: (color) =>
+    particles(
+      (x, y) => ({ x, y, vx: rand(-1, 1), vy: rand(-1, 0.5), life: 1, size: rand(8, 14), decay: 0.02 }),
+      glyph('★', color),
+      0.05,
+      2,
+    ),
+
+  // Hot white-yellow at birth, cooling to orange then red as it rises and shrinks.
+  fire: () =>
+    particles(
+      (x, y) => ({ x: x + rand(-3, 3), y, vx: rand(-0.4, 0.4), vy: rand(-1.8, -0.8), life: 1, size: rand(3, 6), decay: 0.03 }),
+      (ctx, p) => {
+        ctx.fillStyle = p.life > 0.6 ? '#ffe08a' : p.life > 0.3 ? '#ff8a1d' : '#d6361b';
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size * p.life + 0.5, 0, Math.PI * 2);
+        ctx.fill();
+      },
+      -0.02,
+    ),
+
+  // A tapering streak that thins and fades toward its tail.
+  comet: (color) =>
+    chain(18, 0.5, (ctx, points, cursor) => {
+      ctx.strokeStyle = color;
+      ctx.lineCap = 'round';
+      let prev = cursor;
+      points.forEach((p, i) => {
+        const t = 1 - i / points.length;
+        ctx.globalAlpha = t;
+        ctx.lineWidth = 0.5 + 6 * t;
+        ctx.beginPath();
+        ctx.moveTo(prev.x, prev.y);
+        ctx.lineTo(p.x, p.y);
+        ctx.stroke();
+        prev = p;
+      });
+      ctx.globalAlpha = 1;
+    }),
+
+  // Falling green glyphs, the newest one bright.
+  matrix: () =>
+    particles(
+      (x, y) => ({ x, y, vx: 0, vy: rand(0.8, 2), life: 1, size: rand(10, 15), decay: 0.02 }),
+      (ctx, p) => {
+        ctx.font = `${Math.floor(p.size)}px monospace`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = p.life > 0.85 ? '#d9ffe0' : '#3dff7a';
+        ctx.fillText(pick(KATAKANA, p.size), p.x, p.y);
+      },
+      0.02,
+      2,
+    ),
+
+  // Rings spreading out from where the pointer passed.
+  ripple: (color) =>
+    particles(
+      (x, y) => ({ x, y, vx: 0, vy: 0, life: 1, size: rand(18, 30), decay: 0.025 }),
+      (ctx, p) => {
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, (1 - p.life) * p.size + 2, 0, Math.PI * 2);
+        ctx.stroke();
+      },
+      0,
+      6,
+    ),
+
+  // Tumbling paper strips thrown up and falling back down.
+  confetti: () =>
+    particles(
+      (x, y) => ({ x, y, vx: rand(-2, 2), vy: rand(-3, -1), life: 1.3, size: rand(0, 1), decay: 0.015 }),
+      (ctx, p) => {
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.life * 8 + p.size * 6);
+        ctx.fillStyle = pick(CONFETTI, p.size);
+        ctx.fillRect(-3, -1.5, 6, 3);
+        ctx.restore();
+      },
+      0.09,
+      2,
+    ),
 };

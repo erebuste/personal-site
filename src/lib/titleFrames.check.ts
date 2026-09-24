@@ -17,5 +17,9 @@ for (const [name, make] of Object.entries(TITLE_FRAMES)) {
   }
 }
 for (const f of TITLE_FRAMES.glitch('tagged')) assert.equal([...f].length, 6);
+assert.deepEqual(TITLE_FRAMES.dots('ab'), ['ab', 'ab.', 'ab..', 'ab...']);
+assert.deepEqual(TITLE_FRAMES.reveal('abc').slice(0, 3), ['b', 'ab', 'abc']);
+assert.equal(TITLE_FRAMES.reveal('a b')[0], '⠀'); // middle char is a space: blank, not an empty-looking title
+assert.ok(TITLE_FRAMES.bounce('ab').every((f) => f.endsWith('ab')));
 
 console.log('titleFrames: all checks passed');
