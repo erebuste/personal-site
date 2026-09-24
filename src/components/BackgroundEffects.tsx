@@ -5,26 +5,38 @@ import { Media } from './Media';
 
 const rand = (min: number, max: number) => min + Math.random() * (max - min);
 
-/** Randomised once per mount so every petal falls, sways and spins at its own pace. */
-function SakuraPetals({ count }: { count: number }) {
-  const [petals] = useState(() =>
+/** Overlays drawn as individual particles; index.css decides what each one looks like and how it moves. */
+const PARTICLE_CLASSES: Partial<Record<PageOverlay, string>> = {
+  sakura: 'sakura-petal',
+  leaves: 'sakura-petal leaf',
+  fireflies: 'firefly',
+  embers: 'ember',
+  hearts: 'heart',
+  bubbles: 'bubble',
+};
+
+/** Randomised once per mount so every particle moves at its own pace. */
+function Particles({ className, count }: { className: string; count: number }) {
+  const [particles] = useState(() =>
     Array.from({ length: count }, () => ({
       left: `${rand(0, 100)}%`,
+      '--top': `${rand(0, 100)}%`,
       '--size': `${rand(9, 16)}px`,
       '--fall': `${rand(9, 18)}s`,
-      '--delay': `${-rand(0, 18)}s`, // negative: start mid-fall so the screen isn't empty at first
+      '--delay': `${-rand(0, 18)}s`, // negative: start mid-flight so the screen isn't empty at first
       '--sway': `${rand(20, 60)}px`,
       '--spin': `${rand(4, 9)}s`,
     })),
   );
-  return petals.map((style, i) => <span key={i} className="sakura-petal" style={style as CSSProperties} />);
+  return particles.map((style, i) => <span key={i} className={className} style={style as CSSProperties} />);
 }
 
 /** Full-page overlay effect; `preview` pins it to the parent box instead of the viewport (admin preview). */
 export function PageOverlayLayer({ type, preview = false }: { type: Exclude<PageOverlay, 'none'>; preview?: boolean }) {
+  const particle = PARTICLE_CLASSES[type];
   return (
     <div aria-hidden className={`page-overlay overlay-${type} ${preview ? 'overlay-preview' : ''}`}>
-      {type === 'sakura' && <SakuraPetals count={preview ? 12 : 28} />}
+      {particle && <Particles className={particle} count={preview ? 12 : 28} />}
     </div>
   );
 }

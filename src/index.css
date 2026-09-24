@@ -69,6 +69,47 @@ body {
   90% { transform: translateY(-2px); }
   100% { transform: none; }
 }
+.enter-slide-left { animation-name: enter-slide-left; }
+.enter-slide-right { animation-name: enter-slide-right; }
+.enter-rotate-in { animation-name: enter-rotate-in; }
+.enter-swing { animation-name: enter-swing; transform-origin: 50% 0; animation-timing-function: ease-out; }
+.enter-elastic { animation-name: enter-elastic; animation-timing-function: ease-out; }
+.enter-unfold { animation-name: enter-unfold; animation-timing-function: ease-in-out; }
+.enter-glitch-in { animation-name: enter-glitch-in; animation-timing-function: steps(1); }
+@keyframes enter-slide-left { from { opacity: 0; transform: translateX(40px); } }
+@keyframes enter-slide-right { from { opacity: 0; transform: translateX(-40px); } }
+@keyframes enter-rotate-in { from { opacity: 0; transform: rotate(-8deg) scale(0.9); } }
+/* Hangs from the top edge and swings to rest. */
+@keyframes enter-swing {
+  0% { opacity: 0; transform: rotate(14deg); }
+  35% { opacity: 1; transform: rotate(-9deg); }
+  60% { transform: rotate(5deg); }
+  80% { transform: rotate(-2deg); }
+  100% { transform: none; }
+}
+@keyframes enter-elastic {
+  0% { opacity: 0; transform: scale(0.3); }
+  45% { opacity: 1; transform: scale(1.08); }
+  65% { transform: scale(0.96); }
+  85% { transform: scale(1.02); }
+  100% { transform: none; }
+}
+/* Opens as a thin line across, then grows downwards. */
+@keyframes enter-unfold {
+  0% { opacity: 0; transform: scale(0.05, 0.01); }
+  45% { opacity: 1; transform: scale(1, 0.01); }
+  100% { transform: none; }
+}
+/* Slices of the card jump into place (steps(1): no tweening between frames). */
+@keyframes enter-glitch-in {
+  0% { opacity: 0; }
+  12% { opacity: 1; transform: translateX(-14px) skewX(10deg); clip-path: inset(38% 0 44% 0); }
+  26% { transform: translateX(12px); clip-path: inset(8% 0 70% 0); }
+  40% { transform: translateX(-7px) skewX(-5deg); clip-path: inset(62% 0 4% 0); }
+  56% { transform: translateX(5px); clip-path: inset(0 0 32% 0); }
+  72% { transform: translateX(-2px); clip-path: inset(18% 0 0 0); }
+  86% { transform: none; clip-path: inset(0); }
+}
 
 /* ---- Page overlays (<div class="page-overlay overlay-*">), purely decorative ---- */
 :root {
@@ -166,14 +207,17 @@ body {
   80% { transform: translate(7%, 5%); }
 }
 
-/* Rain: two layers of slanted streaks at different speeds. */
+/* Rain: two layers of slanted streaks at different speeds. Thunderstorm reuses it and adds lightning. */
 .overlay-rain::before,
-.overlay-rain::after {
+.overlay-rain::after,
+.overlay-storm::before,
+.overlay-storm::after {
   inset: 0;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cg stroke='%23c8d8ff' stroke-opacity='.35' stroke-linecap='round'%3E%3Cpath d='M20 0l-6 30M90 60l-6 30M150 20l-6 30M60 130l-6 30M180 110l-6 30M120 170l-6 30'/%3E%3C/g%3E%3C/svg%3E");
   animation: rain-fall 0.55s linear infinite;
 }
-.overlay-rain::after {
+.overlay-rain::after,
+.overlay-storm::after {
   background-size: 140px 140px;
   opacity: 0.6;
   animation-duration: 0.8s;
@@ -225,6 +269,127 @@ body {
 @keyframes sakura-spin {
   from { rotate: 0deg; }
   to { rotate: 360deg; }
+}
+
+/* Thunderstorm: darker sky and a soft double flash every ~9s (kept faint and well under 3 flashes/second). */
+.overlay-storm { animation: storm-flash 9s linear infinite; }
+@keyframes storm-flash {
+  0%, 100% { background-color: rgb(8 12 24 / 0.25); }
+  88% { background-color: rgb(8 12 24 / 0.25); }
+  89% { background-color: rgb(220 230 255 / 0.16); }
+  90.5% { background-color: rgb(8 12 24 / 0.25); }
+  92% { background-color: rgb(220 230 255 / 0.1); }
+  94% { background-color: rgb(8 12 24 / 0.25); }
+}
+
+/* Autumn leaves: the sakura motion with a leaf shape and colors. */
+.sakura-petal.leaf {
+  width: calc(var(--size) * 1.3);
+  border-radius: 0 100% 0 100%;
+  background: linear-gradient(135deg, #f6c453, #e8762c 55%, #a8431c);
+  box-shadow: none;
+}
+
+/* Fireflies: glowing dots drifting around a random spot and pulsing. */
+.firefly {
+  position: absolute;
+  top: var(--top);
+  width: calc(var(--size) / 3);
+  height: calc(var(--size) / 3);
+  border-radius: 50%;
+  background: #fff6a8;
+  box-shadow: 0 0 10px 3px rgb(255 230 110 / 0.55);
+  animation:
+    firefly-drift var(--fall) ease-in-out var(--delay) infinite alternate,
+    firefly-pulse calc(var(--spin) / 2) ease-in-out var(--delay) infinite alternate;
+}
+@keyframes firefly-drift {
+  from { translate: calc(var(--sway) * -1) calc(var(--sway) / 2); }
+  to { translate: var(--sway) calc(var(--sway) * -1); }
+}
+@keyframes firefly-pulse {
+  from { opacity: 0.1; }
+  to { opacity: 1; }
+}
+
+/* Rising particles (embers, hearts, bubbles): float up from below the page, swaying, shrinking near the top. */
+.ember,
+.heart,
+.bubble {
+  position: absolute;
+  bottom: -8%;
+  animation:
+    particle-rise var(--fall) linear var(--delay) infinite,
+    sakura-sway calc(var(--fall) / 3) ease-in-out var(--delay) infinite alternate;
+}
+@keyframes particle-rise {
+  from { bottom: -8%; }
+  to { bottom: 108%; scale: 0.4; }
+}
+.ember {
+  width: calc(var(--size) / 3.5);
+  height: calc(var(--size) / 3.5);
+  border-radius: 50%;
+  background: #ffb347;
+  box-shadow: 0 0 8px 2px rgb(255 110 30 / 0.65);
+  animation:
+    particle-rise calc(var(--fall) * 0.7) linear var(--delay) infinite,
+    sakura-sway calc(var(--fall) / 4) ease-in-out var(--delay) infinite alternate,
+    firefly-pulse 0.7s ease-in-out infinite alternate;
+}
+.heart {
+  font-size: calc(var(--size) * 1.1);
+  line-height: 1;
+  color: #ff6b9d;
+  text-shadow: 0 0 8px rgb(255 107 157 / 0.6);
+  opacity: 0.8;
+}
+.heart::before { content: '\2665'; }
+.bubble {
+  width: calc(var(--size) * 1.6);
+  height: calc(var(--size) * 1.6);
+  border-radius: 50%;
+  border: 1px solid rgb(255 255 255 / 0.35);
+  background: radial-gradient(circle at 32% 30%, rgb(255 255 255 / 0.45), transparent 35%), rgb(255 255 255 / 0.04);
+}
+
+/* Starry night: two layers of stars twinkling out of step. */
+.overlay-stars::before,
+.overlay-stars::after {
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cg fill='%23fff'%3E%3Ccircle cx='20' cy='30' r='1'/%3E%3Ccircle cx='120' cy='12' r='.7'/%3E%3Ccircle cx='210' cy='60' r='1.2'/%3E%3Ccircle cx='70' cy='110' r='.8'/%3E%3Ccircle cx='170' cy='150' r='1'/%3E%3Ccircle cx='30' cy='200' r='1.3'/%3E%3Ccircle cx='130' cy='230' r='.7'/%3E%3Ccircle cx='240' cy='210' r='.9'/%3E%3C/g%3E%3C/svg%3E");
+  animation: star-twinkle 3.5s ease-in-out infinite alternate;
+}
+.overlay-stars::after {
+  background-size: 170px 170px;
+  background-position: 60px 90px;
+  animation-duration: 2.3s;
+  animation-delay: -1.2s;
+}
+@keyframes star-twinkle {
+  from { opacity: 0.25; }
+  to { opacity: 0.9; }
+}
+
+/* Aurora: soft green and violet glows slowly drifting across the top of the page. */
+.overlay-aurora::before,
+.overlay-aurora::after {
+  inset: -30% -20% 20%;
+  background:
+    radial-gradient(ellipse 45% 30% at 30% 25%, rgb(52 245 170 / 0.16), transparent 70%),
+    radial-gradient(ellipse 40% 26% at 72% 18%, rgb(139 92 246 / 0.18), transparent 70%);
+  animation: aurora-drift 16s ease-in-out infinite alternate;
+}
+.overlay-aurora::after {
+  background:
+    radial-gradient(ellipse 38% 24% at 55% 30%, rgb(56 189 248 / 0.14), transparent 70%),
+    radial-gradient(ellipse 30% 22% at 18% 12%, rgb(236 72 153 / 0.1), transparent 70%);
+  animation-duration: 23s;
+  animation-delay: -8s;
+}
+@keyframes aurora-drift {
+  from { transform: translateX(-6%) rotate(-3deg) scaleY(0.9); }
+  to { transform: translateX(6%) rotate(3deg) scaleY(1.15); }
 }
 
 /* Vignette: darkened edges. */

@@ -18,17 +18,42 @@ export const PLATFORMS = [
 ] as const;
 
 export const CURSOR_TRAILS = ['none', 'fairy-dust', 'bubbles', 'snow', 'rainbow', 'ghost', 'follow', 'emoji'] as const;
-export const PAGE_OVERLAYS = ['none', 'glitch', 'crt', 'vhs', 'grain', 'rain', 'snow', 'sakura', 'vignette'] as const;
+export const PAGE_OVERLAYS = [
+  'none',
+  'glitch',
+  'crt',
+  'vhs',
+  'grain',
+  'rain',
+  'storm',
+  'snow',
+  'sakura',
+  'leaves',
+  'fireflies',
+  'embers',
+  'hearts',
+  'bubbles',
+  'stars',
+  'aurora',
+  'vignette',
+] as const;
 export const ENTER_ANIMATIONS = [
   'none',
   'slide-up',
   'slide-down',
+  'slide-left',
+  'slide-right',
   'fade',
   'zoom-in',
   'zoom-out',
   'blur-in',
   'flip',
   'bounce',
+  'rotate-in',
+  'swing',
+  'elastic',
+  'unfold',
+  'glitch-in',
 ] as const;
 export const TITLE_ANIMATIONS =['none', 'typing', 'scroll', 'blink', 'wave', 'glitch', 'decrypt', 'sparkle'] as const;
 export const USERNAME_EFFECTS =['none', 'glow', 'neon', 'rainbow', 'shimmer', 'glitch', 'wave', 'typewriter'] as const;
