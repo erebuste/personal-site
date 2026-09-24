@@ -1,5 +1,5 @@
 import { useAdmin } from '../state';
-import { PageHeader, Section, TextInput, Toggle } from '../ui';
+import { Info, PageHeader, Section, TextInput, Toggle } from '../ui';
 
 export function OptionsPage() {
   const { draft, update } = useAdmin();
@@ -51,8 +51,14 @@ export function OptionsPage() {
             value={draft.discordPresence.userId}
             onChange={(v) => update((d) => void (d.discordPresence.userId = v.replace(/\D/g, '')))}
             placeholder="123456789012345678"
-            hint="Join discord.gg/lanyard, then Discord → Settings → Advanced → Developer Mode → right-click yourself → Copy User ID"
+            hint="Discord → Settings → Advanced → Developer Mode → right-click yourself → Copy User ID"
           />
+        )}
+        {draft.discordPresence.enabled && (
+          <Info>
+            Uses your own bot: set DISCORD_BOT_TOKEN in .env (steps in .env.example) and add the bot to a server you're in.
+            The card stays hidden until the bot can see you.
+          </Info>
         )}
       </Section>
     </div>

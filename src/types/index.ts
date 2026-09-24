@@ -183,16 +183,16 @@ export interface StatsResponse {
   lastWeek: { date: string; count: number }[];
 }
 
-// Subset of the https://github.com/Phineas/lanyard response we render.
-export interface LanyardActivity {
+/** GET /api/presence, from our own Discord bot (server/discord.ts). Same shape Lanyard uses. */
+export interface PresenceActivity {
   type: number;
   name: string;
-  state?: string;
-  details?: string;
+  state?: string | undefined;
+  details?: string | undefined;
 }
 
-export interface LanyardData {
+export interface PresenceData {
   discord_user: { id: string; username: string; global_name: string | null; avatar: string | null };
   discord_status: 'online' | 'idle' | 'dnd' | 'offline';
-  activities: LanyardActivity[];
+  activities: PresenceActivity[];
 }

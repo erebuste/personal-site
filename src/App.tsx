@@ -54,7 +54,7 @@ export default function App({ profile, views }: Props) {
             <SocialLinks links={links} theme={theme} />
             {showcases.length > 0 && <Showcases items={showcases} box={box} theme={theme} />}
           </ProfileCard>
-          {discordPresence.enabled && <DiscordPresence userId={discordPresence.userId} box={box} theme={theme} />}
+          {discordPresence.enabled && <DiscordPresence box={box} theme={theme} />}
         </main>
       ) : (
         <ClickToEnterOverlay text={page.reveal.text} blur={page.reveal.blur} onEnter={reveal} />

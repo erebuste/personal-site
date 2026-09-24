@@ -8,6 +8,7 @@ import { bodyLimit } from 'hono/body-limit';
 import { deleteCookie, getCookie, setCookie } from 'hono/cookie';
 import { csrf } from 'hono/csrf';
 import { profileSchema, type ProfileConfig, type PublicProfileResponse } from '../src/types/index.ts';
+import { startPresenceBot } from './discord.ts';
 import { UPLOAD_DIR, countView, getProfile, saveProfile, stats } from './store.ts';
 
 const PORT = Number(process.env.PORT ?? 3001);
@@ -20,6 +21,10 @@ const SESSION_MS = 7 * 86_400_000;
 const MAX_UPLOAD = 100 * 1024 * 1024;
 
 if (!PASSWORD) console.warn('ADMIN_PASSWORD is not set: /admin login is disabled.');
+
+const BOT_TOKEN = process.env.DISCORD_BOT_TOKEN ?? '';
+const getPresence = BOT_TOKEN ? startPresenceBot(BOT_TOKEN) : null;
+if (!BOT_TOKEN) console.warn('DISCORD_BOT_TOKEN is not set: Discord presence is disabled.');
 
 // ---- auth: stateless HMAC-signed cookie `<expiry>.<signature>` ----
 // ponytail: logout only clears the cookie; rotate SESSION_SECRET to revoke every session.
@@ -118,6 +123,13 @@ app.post('/api/login', async (c) => {
 app.post('/api/logout', (c) => {
   deleteCookie(c, 'session', { path: '/' });
   return c.json({ ok: true });
+});
+
+// Only the saved profile's user ID is ever looked up, so visitors can't use the bot to query other people.
+app.get('/api/presence', async (c) => {
+  const { enabled, userId } = getProfile().discordPresence;
+  const data = getPresence && enabled && userId ? await getPresence(userId) : null;
+  return data ? c.json(data, 200, { 'Cache-Control': 'no-store' }) : c.json({ error: 'Presence unavailable.' }, 404);
 });
 
 app.use('/api/admin/*', async (c, next) => {
