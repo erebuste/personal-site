@@ -1,0 +1,346 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/unbounded';
+
+@theme {
+  --font-sans: 'Unbounded Variable', ui-sans-serif, system-ui, sans-serif;
+  /* Admin body text: Unbounded is a display face, too wide for dense forms. */
+  --font-ui: ui-sans-serif, system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+
+  /* Admin "Midnight Purple" palette: change the scheme here. Used as bg-adm-*, text-adm-*, border-adm-*. */
+  --color-adm-bg: #0b0914;
+  --color-adm-panel: #131024;
+  --color-adm-field: #0f0c1d;
+  --color-adm-line: #231d3d;
+  --color-adm-line-strong: #362c5c;
+  --color-adm-text: #ece9f7;
+  --color-adm-muted: #8a84a6;
+  --color-adm-dim: #5d5778;
+  --color-adm-violet: #8b5cf6;
+  --color-adm-pink: #ec4899;
+  --color-adm-danger: #f43f5e;
+
+  --animate-twinkle: twinkle 1.8s ease-in-out infinite;
+  --animate-fade-in: fade-in 300ms ease-out backwards;
+
+  @keyframes twinkle {
+    0%, 100% { opacity: 0; transform: scale(0.3) rotate(0deg); }
+    50% { opacity: 1; transform: scale(1) rotate(45deg); }
+  }
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+}
+
+html,
+body {
+  background: #090909;
+  color: #fff;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---- Page enter animations (<main class="enter enter-*">), duration via --enter-ms ---- */
+/* `backwards`, not `both`: a lingering opacity/filter animation makes <main> a backdrop root,
+   which stops backdrop-filter on the glass boxes from seeing the page background. */
+.enter {
+  animation-duration: var(--enter-ms, 350ms);
+  animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+  animation-fill-mode: backwards;
+}
+.enter-slide-up { animation-name: enter-slide-up; }
+.enter-slide-down { animation-name: enter-slide-down; }
+.enter-fade { animation-name: enter-fade; }
+.enter-zoom-in { animation-name: enter-zoom-in; }
+.enter-zoom-out { animation-name: enter-zoom-out; }
+.enter-blur-in { animation-name: enter-blur-in; }
+.enter-flip { animation-name: enter-flip; transform-origin: 50% 0; }
+.enter-bounce { animation-name: enter-bounce; animation-timing-function: ease-out; }
+@keyframes enter-slide-up { from { opacity: 0; transform: translateY(28px); } }
+@keyframes enter-slide-down { from { opacity: 0; transform: translateY(-28px); } }
+@keyframes enter-fade { from { opacity: 0; } }
+@keyframes enter-zoom-in { from { opacity: 0; transform: scale(0.9); } }
+@keyframes enter-zoom-out { from { opacity: 0; transform: scale(1.1); } }
+@keyframes enter-blur-in { from { opacity: 0; filter: blur(14px); } }
+@keyframes enter-flip { from { opacity: 0; transform: perspective(1200px) rotateX(-28deg) translateY(16px); } }
+@keyframes enter-bounce {
+  0% { opacity: 0; transform: translateY(44px); }
+  55% { opacity: 1; transform: translateY(-10px); }
+  75% { transform: translateY(4px); }
+  90% { transform: translateY(-2px); }
+  100% { transform: none; }
+}
+
+/* ---- Page overlays (<div class="page-overlay overlay-*">), purely decorative ---- */
+:root {
+  --noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.page-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  overflow: hidden;
+  pointer-events: none;
+}
+.page-overlay.overlay-preview { position: absolute; z-index: auto; }
+.page-overlay::before,
+.page-overlay::after { content: ''; position: absolute; pointer-events: none; }
+
+/* Glitch: faint scanlines, a rolling scan band and an occasional jolt. */
+.overlay-glitch {
+  background: repeating-linear-gradient(0deg, rgb(255 255 255 / 0.025) 0 1px, transparent 1px 3px);
+  animation: glitch-jolt 7s steps(1) infinite;
+}
+.overlay-glitch::after {
+  inset-inline: 0;
+  top: 0;
+  height: 12%;
+  background: linear-gradient(transparent, rgb(255 255 255 / 0.035), transparent);
+  animation: scan-band 8s linear infinite;
+}
+@keyframes glitch-jolt {
+  0%, 100% { transform: none; opacity: 1; }
+  91% { transform: translateX(3px) skewX(1deg); opacity: 0.6; }
+  92% { transform: translateX(-4px); opacity: 1; }
+  93% { transform: none; }
+}
+@keyframes scan-band {
+  from { transform: translateY(-120%); }
+  to { transform: translateY(950%); }
+}
+
+/* CRT: dark scanlines, RGB phosphor stripes, curved-screen vignette, slow flicker. */
+.overlay-crt {
+  background:
+    repeating-linear-gradient(0deg, rgb(0 0 0 / 0.28) 0 1px, transparent 1px 3px),
+    radial-gradient(ellipse at center, transparent 55%, rgb(0 0 0 / 0.6));
+  animation: crt-flicker 4s linear infinite;
+}
+.overlay-crt::after {
+  inset: 0;
+  background: repeating-linear-gradient(
+    90deg,
+    rgb(255 0 60 / 0.04) 0 1px,
+    rgb(0 255 120 / 0.03) 1px 2px,
+    rgb(0 120 255 / 0.04) 2px 3px
+  );
+}
+@keyframes crt-flicker {
+  0%, 100% { opacity: 1; }
+  48% { opacity: 1; }
+  50% { opacity: 0.88; }
+  52% { opacity: 1; }
+  80% { opacity: 0.94; }
+}
+
+/* VHS: grain, soft scanlines and a bright tracking band sliding down. */
+.overlay-vhs {
+  background: repeating-linear-gradient(0deg, rgb(255 255 255 / 0.03) 0 1px, transparent 1px 4px);
+}
+.overlay-vhs::before {
+  inset: -50%;
+  background: var(--noise);
+  opacity: 0.09;
+  animation: grain-jitter 0.6s steps(1) infinite;
+}
+.overlay-vhs::after {
+  inset-inline: 0;
+  top: 0;
+  height: 14%;
+  background: linear-gradient(transparent, rgb(255 255 255 / 0.07) 40%, rgb(190 220 255 / 0.12) 50%, rgb(255 255 255 / 0.07) 60%, transparent);
+  filter: blur(2px);
+  animation: scan-band 5.5s linear infinite;
+}
+
+/* Film grain: animated noise only. */
+.overlay-grain::before {
+  inset: -50%;
+  background: var(--noise);
+  opacity: 0.13;
+  animation: grain-jitter 0.5s steps(1) infinite;
+}
+@keyframes grain-jitter {
+  0% { transform: translate(0, 0); }
+  20% { transform: translate(-6%, 4%); }
+  40% { transform: translate(5%, -7%); }
+  60% { transform: translate(-3%, -4%); }
+  80% { transform: translate(7%, 5%); }
+}
+
+/* Rain: two layers of slanted streaks at different speeds. */
+.overlay-rain::before,
+.overlay-rain::after {
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cg stroke='%23c8d8ff' stroke-opacity='.35' stroke-linecap='round'%3E%3Cpath d='M20 0l-6 30M90 60l-6 30M150 20l-6 30M60 130l-6 30M180 110l-6 30M120 170l-6 30'/%3E%3C/g%3E%3C/svg%3E");
+  animation: rain-fall 0.55s linear infinite;
+}
+.overlay-rain::after {
+  background-size: 140px 140px;
+  opacity: 0.6;
+  animation-duration: 0.8s;
+}
+@keyframes rain-fall {
+  to { background-position: -40px 200px; }
+}
+
+/* Snow: two layers of flakes drifting down. */
+.overlay-snow::before,
+.overlay-snow::after {
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cg fill='%23fff' fill-opacity='.75'%3E%3Ccircle cx='30' cy='40' r='2'/%3E%3Ccircle cx='140' cy='20' r='1.5'/%3E%3Ccircle cx='250' cy='80' r='2.5'/%3E%3Ccircle cx='80' cy='150' r='1.5'/%3E%3Ccircle cx='200' cy='190' r='2'/%3E%3Ccircle cx='40' cy='250' r='2.5'/%3E%3Ccircle cx='160' cy='270' r='1.5'/%3E%3Ccircle cx='280' cy='240' r='1.5'/%3E%3C/g%3E%3C/svg%3E");
+  animation: snow-fall 14s linear infinite;
+}
+.overlay-snow::after {
+  background-size: 180px 180px;
+  opacity: 0.55;
+  animation-duration: 22s;
+}
+@keyframes snow-fall {
+  to { background-position: 60px 300px; }
+}
+
+/* Sakura: individual petals (rendered by <PageOverlayLayer>) that fall, sway and spin independently.
+   Separate top / translate / rotate animations so the three motions don't overwrite each other. */
+.sakura-petal {
+  position: absolute;
+  top: -10%;
+  width: var(--size);
+  height: calc(var(--size) * 0.75);
+  border-radius: 150% 0 150% 0;
+  background: linear-gradient(135deg, #ffe4ec, #ffb7c9 55%, #f48fb1);
+  box-shadow: 0 0 6px rgb(255 183 201 / 0.35);
+  opacity: 0.9;
+  animation:
+    sakura-fall var(--fall) linear var(--delay) infinite,
+    sakura-sway calc(var(--fall) / 3) ease-in-out var(--delay) infinite alternate,
+    sakura-spin var(--spin) linear var(--delay) infinite;
+}
+@keyframes sakura-fall {
+  from { top: -10%; }
+  to { top: 110%; }
+}
+@keyframes sakura-sway {
+  from { translate: calc(var(--sway) * -1) 0; }
+  to { translate: var(--sway) 0; }
+}
+@keyframes sakura-spin {
+  from { rotate: 0deg; }
+  to { rotate: 360deg; }
+}
+
+/* Vignette: darkened edges. */
+.overlay-vignette {
+  background: radial-gradient(ellipse at center, transparent 40%, rgb(0 0 0 / 0.75) 100%);
+}
+
+/* ---- Username effects (see <Username>); --fx-accent / --fx-base come from the theme ---- */
+.fx-glow { animation: fx-glow 2.2s ease-in-out infinite; }
+@keyframes fx-glow {
+  0%, 100% { text-shadow: 0 0 4px var(--fx-accent); }
+  50% { text-shadow: 0 0 12px var(--fx-accent), 0 0 28px var(--fx-accent); }
+}
+
+.fx-neon {
+  text-shadow: 0 0 4px var(--fx-accent), 0 0 12px var(--fx-accent), 0 0 28px var(--fx-accent);
+  animation: fx-flicker 5s linear infinite;
+}
+@keyframes fx-flicker {
+  0%, 18%, 22%, 25%, 53%, 57%, 100% { opacity: 1; }
+  20%, 24%, 55% { opacity: 0.35; text-shadow: none; }
+}
+
+.fx-rainbow,
+.fx-shimmer {
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  animation: fx-pan 3s linear infinite;
+}
+.fx-rainbow {
+  background-image: linear-gradient(90deg, #ff5f6d, #ffc371, #47e891, #3fa7ff, #b16cff, #ff5f6d);
+  background-size: 200% auto;
+}
+.fx-shimmer {
+  background-image: linear-gradient(110deg, var(--fx-base) 35%, #fff 50%, var(--fx-base) 65%);
+  background-size: 250% auto;
+  animation-duration: 2.4s;
+  animation-direction: reverse;
+}
+@keyframes fx-pan { to { background-position: 200% center; } }
+
+.fx-glitch { position: relative; display: inline-block; }
+.fx-glitch::before,
+.fx-glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.fx-glitch::before { color: #0ff; animation: fx-glitch-a 2.6s steps(1) infinite; }
+.fx-glitch::after { color: #f0f; animation: fx-glitch-b 3.1s steps(1) infinite; }
+@keyframes fx-glitch-a {
+  0%, 100% { clip-path: inset(0 0 65% 0); transform: translate(-2px, 0); }
+  20% { clip-path: inset(30% 0 45% 0); transform: translate(2px, -1px); }
+  40% { clip-path: inset(75% 0 5% 0); transform: translate(-3px, 1px); }
+  60% { clip-path: inset(10% 0 80% 0); transform: translate(1px, 0); }
+  80% { clip-path: inset(50% 0 30% 0); transform: translate(-1px, 1px); }
+}
+@keyframes fx-glitch-b {
+  0%, 100% { clip-path: inset(60% 0 0 0); transform: translate(2px, 0); }
+  25% { clip-path: inset(15% 0 60% 0); transform: translate(-2px, 1px); }
+  50% { clip-path: inset(80% 0 2% 0); transform: translate(3px, -1px); }
+  75% { clip-path: inset(40% 0 35% 0); transform: translate(-1px, 0); }
+}
+
+.fx-wave > span {
+  display: inline-block;
+  animation: fx-wave 1.6s ease-in-out infinite;
+  animation-delay: calc(var(--i) * 90ms);
+}
+@keyframes fx-wave {
+  0%, 60%, 100% { transform: translateY(0); }
+  30% { transform: translateY(-5px); }
+}
+
+.fx-typewriter::after {
+  content: '|';
+  margin-left: 2px;
+  font-weight: 300;
+  animation: fx-blink 1s steps(1) infinite;
+}
+@keyframes fx-blink { 50% { opacity: 0; } }
+
+/* Admin sliders: gradient-filled track up to --fill (set inline), white thumb with a violet halo. */
+.fc-range {
+  appearance: none;
+  height: 4px;
+  border-radius: 9999px;
+  cursor: pointer;
+  background:
+    linear-gradient(90deg, var(--color-adm-violet), var(--color-adm-pink)) 0 / var(--fill, 0%) 100% no-repeat,
+    var(--color-adm-line);
+}
+.fc-range::-webkit-slider-thumb {
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 9999px;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgb(139 92 246 / 0.35);
+}
+.fc-range::-moz-range-track { background: transparent; }
+.fc-range::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border: 0;
+  border-radius: 9999px;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgb(139 92 246 / 0.35);
+}
+.adm select option { background: var(--color-adm-panel); color: var(--color-adm-text); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
