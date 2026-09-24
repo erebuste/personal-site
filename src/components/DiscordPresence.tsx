@@ -49,7 +49,15 @@ export function DiscordPresence({ box, theme }: Props) {
     : 'https://cdn.discordapp.com/embed/avatars/0.png';
 
   return (
-    <section className="flex items-center gap-4 p-2.5 text-left" style={boxStyle(box)} aria-live="polite">
+    <a
+      href={`https://discord.com/users/${user.id}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      title="Open Discord profile"
+      className="flex items-center gap-4 p-2.5 text-left transition hover:-translate-y-0.5 focus-visible:outline-2"
+      style={{ ...boxStyle(box), outlineColor: theme.accent }}
+      aria-live="polite"
+    >
       <div className="relative shrink-0">
         <img src={avatar} alt="" width={64} height={64} className="size-16 rounded-full" />
         <span
@@ -66,6 +74,6 @@ export function DiscordPresence({ box, theme }: Props) {
           {activityLine(data)}
         </p>
       </div>
-    </section>
+    </a>
   );
 }
