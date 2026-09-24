@@ -17,6 +17,8 @@ export const defaultProfile: ProfileConfig = {
     { platform: 'youtube', title: 'YouTube', action: { type: 'url', href: 'https://youtube.com/@tagged' } },
   ],
 
+  showcases: [],
+
   audio: { src: null, title: 'When I Die', cover: null, volume: 40, showPlayer: true },
 
   theme: {

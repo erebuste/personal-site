@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import {
   ExternalLink,
+  Images,
   LayoutDashboard,
   Link2,
   LogOut,
@@ -16,7 +17,7 @@ import {
 import type { ProfileConfig, PublicProfileResponse } from '../types';
 import { AppearancePage } from './pages/Appearance';
 import { DashboardPage } from './pages/Dashboard';
-import { EmbedPage, LinksPage, TracksPage } from './pages/Extras';
+import { EmbedPage, LinksPage, ShowcasesPage, TracksPage } from './pages/Extras';
 import { OptionsPage } from './pages/Options';
 import { ProfilePage } from './pages/Profile';
 import { AdminContext, api, errorMessage, type AdminState, type Page } from './state';
@@ -37,6 +38,7 @@ const NAV: { title: string; items: { page: Page; label: string; icon: LucideIcon
     items: [
       { page: 'embed', label: 'Profile Embed', icon: Share2 },
       { page: 'links', label: 'Links', icon: Link2 },
+      { page: 'showcases', label: 'Showcases', icon: Images },
       { page: 'tracks', label: 'Tracks', icon: Music },
     ],
   },
@@ -49,6 +51,7 @@ const PAGES: Record<Page, () => ReactNode> = {
   appearance: AppearancePage,
   embed: EmbedPage,
   links: LinksPage,
+  showcases: ShowcasesPage,
   tracks: TracksPage,
 };
 

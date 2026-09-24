@@ -75,6 +75,17 @@ export const profileSchema = z.object({
       }),
     )
     .max(50),
+  /** Image cards under the profile card. */
+  showcases: z
+    .array(
+      z.object({
+        title: z.string().trim().min(1).max(75),
+        description: z.string().max(250),
+        image: media,
+        href: httpUrl.nullable(),
+      }),
+    )
+    .max(12),
   audio: z.object({
     src: media.nullable(),
     title: z.string().max(100),
@@ -147,6 +158,7 @@ export type ProfileConfig = z.infer<typeof profileSchema>;
 export type UserProfile = ProfileConfig['user'];
 export type SocialLink = ProfileConfig['links'][number];
 export type Platform = SocialLink['platform'];
+export type Showcase = ProfileConfig['showcases'][number];
 export type AudioTrackConfig = ProfileConfig['audio'];
 export type ThemeConfig = ProfileConfig['theme'];
 export type BoxConfig = ProfileConfig['box'];

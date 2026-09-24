@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Music, Pencil, Trash2 } from 'lucide-react';
+import { Media } from '../../components/Media';
 import { Icon } from '../../components/SocialLinks';
-import { PLATFORMS, type Platform, type SocialLink } from '../../types';
+import { PLATFORMS, type Platform, type Showcase, type SocialLink } from '../../types';
 import { useAdmin } from '../state';
 import { Button, ColorInput, Field, Grid, Info, PageHeader, Section, Select, TextArea, TextInput, Upload, cx } from '../ui';
 
@@ -205,6 +206,114 @@ export function LinksPage() {
           )}
           <Button disabled={busy || (editing === null && draft.links.length >= 50)} onClick={submit}>
             {editing === null ? 'Add link' : 'Save link'}
+          </Button>
+        </div>
+      </Section>
+    </div>
+  );
+}
+
+// ---- Showcases ----
+
+type ShowcaseForm = { title: string; description: string; image: string | null; href: string };
+const EMPTY_SHOWCASE: ShowcaseForm = { title: '', description: '', image: null, href: '' };
+
+export function ShowcasesPage() {
+  const { draft, commit, notify } = useAdmin();
+  const [editing, setEditing] = useState<number | null>(null);
+  const [form, setForm] = useState<ShowcaseForm>(EMPTY_SHOWCASE);
+  const [busy, setBusy] = useState(false);
+  const set = (patch: Partial<ShowcaseForm>) => setForm((f) => ({ ...f, ...patch }));
+  const cancel = () => {
+    setEditing(null);
+    setForm(EMPTY_SHOWCASE);
+  };
+
+  const run = async (recipe: Parameters<typeof commit>[0], done: string) => {
+    setBusy(true);
+    if (await commit(recipe)) {
+      notify(done);
+      cancel();
+    }
+    setBusy(false);
+  };
+
+  const submit = () => {
+    const { image } = form;
+    if (!form.title.trim()) return notify('Title is required.', 'error');
+    if (!image) return notify('Upload an image first.', 'error');
+    const item: Showcase = { title: form.title.trim(), description: form.description, image, href: form.href.trim() || null };
+    void run((d) => {
+      if (editing === null) d.showcases.push(item);
+      else d.showcases[editing] = item;
+    }, editing === null ? 'Showcase added' : 'Showcase updated');
+  };
+
+  return (
+    <div className="space-y-6">
+      <PageHeader title="Showcases" description={`${draft.showcases.length} of 12 used · image cards under your profile card`} />
+
+      <Section title="Your showcases">
+        {draft.showcases.length === 0 ? (
+          <p className="text-sm text-adm-muted">No showcases yet. Add your first one below.</p>
+        ) : (
+          <ul className="-my-2 divide-y divide-adm-line">
+            {draft.showcases.map((item, i) => (
+              <li key={`${item.title}-${i}`} className={cx('flex items-center gap-3 py-3', editing === i && 'opacity-60')}>
+                <Media src={item.image} className="aspect-video w-20 shrink-0 rounded-lg bg-adm-field object-cover" />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium">{item.title}</p>
+                  <p className="truncate text-xs text-adm-muted">{item.href ?? 'No link'}</p>
+                </div>
+                <Button
+                  tone="ghost"
+                  small
+                  aria-label={`Edit ${item.title}`}
+                  onClick={() => {
+                    setEditing(i);
+                    setForm({ ...item, href: item.href ?? '' });
+                  }}
+                >
+                  <Pencil className="size-3.5" />
+                </Button>
+                <Button
+                  tone="ghost"
+                  small
+                  aria-label={`Delete ${item.title}`}
+                  disabled={busy}
+                  className="hover:text-adm-danger"
+                  onClick={() => void run((d) => void d.showcases.splice(i, 1), 'Showcase deleted')}
+                >
+                  <Trash2 className="size-3.5" />
+                </Button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Section>
+
+      <Section title={editing === null ? 'Add a showcase' : 'Edit showcase'}>
+        <Grid>
+          <TextInput label="Title" required max={75} value={form.title} onChange={(title) => set({ title })} />
+          <TextInput
+            label="Link"
+            max={250}
+            value={form.href}
+            onChange={(href) => set({ href })}
+            placeholder="https://"
+            hint="Optional. Opens in a new tab."
+          />
+        </Grid>
+        <TextArea label="Description" max={250} value={form.description} onChange={(description) => set({ description })} />
+        <Upload label="Image" required kind="media" value={form.image} onChange={(image) => set({ image })} />
+        <div className="flex justify-end gap-2">
+          {editing !== null && (
+            <Button tone="ghost" onClick={cancel}>
+              Cancel
+            </Button>
+          )}
+          <Button disabled={busy || (editing === null && draft.showcases.length >= 12)} onClick={submit}>
+            {editing === null ? 'Add showcase' : 'Save showcase'}
           </Button>
         </div>
       </Section>

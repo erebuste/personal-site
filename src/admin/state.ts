@@ -1,7 +1,7 @@
 import { createContext, useContext } from 'react';
 import type { ProfileConfig } from '../types';
 
-export type Page = 'dashboard' | 'profile' | 'options' | 'appearance' | 'embed' | 'links' | 'tracks';
+export type Page = 'dashboard' | 'profile' | 'options' | 'appearance' | 'embed' | 'links' | 'showcases' | 'tracks';
 export type UploadKind = 'image' | 'media' | 'audio';
 
 export interface AdminState {

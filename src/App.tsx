@@ -4,6 +4,7 @@ import { BackgroundEffects } from './components/BackgroundEffects';
 import { ClickToEnterOverlay } from './components/ClickToEnterOverlay';
 import { DiscordPresence } from './components/DiscordPresence';
 import { ProfileCard } from './components/ProfileCard';
+import { Showcases } from './components/Showcases';
 import { SocialLinks } from './components/SocialLinks';
 import { useTitleAnimation } from './lib/titleFrames';
 import type { ProfileConfig, TitleAnimation } from './types';
@@ -23,7 +24,7 @@ interface Props {
 }
 
 export default function App({ profile, views }: Props) {
-  const { user, links, audio, theme, box, background, page, discordPresence } = profile;
+  const { user, links, showcases, audio, theme, box, background, page, discordPresence } = profile;
   const [revealed, setRevealed] = useState(!page.reveal.enabled);
   const audioRef = useRef<HTMLAudioElement>(null);
 
@@ -52,6 +53,7 @@ export default function App({ profile, views }: Props) {
           <ProfileCard user={user} box={box} theme={theme} views={page.showViews ? views : undefined}>
             <SocialLinks links={links} theme={theme} />
           </ProfileCard>
+          {showcases.length > 0 && <Showcases items={showcases} box={box} theme={theme} />}
           {discordPresence.enabled && <DiscordPresence userId={discordPresence.userId} box={box} theme={theme} />}
         </main>
       ) : (
