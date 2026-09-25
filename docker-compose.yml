@@ -1,5 +1,7 @@
+# IMAGE unset: `up --build` builds locally. IMAGE=ghcr.io/<you>/<repo>: `pull` fetches what CI published.
 services:
   api:
+    image: ${IMAGE:-personal-site}-api:${TAG:-latest}
     build: { context: ., target: api }
     environment:
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Set ADMIN_PASSWORD in .env (see .env.example)}
@@ -12,9 +14,10 @@ services:
     # No ports: only reachable through nginx, which is what makes X-Real-IP trustworthy.
 
   web:
+    image: ${IMAGE:-personal-site}-web:${TAG:-latest}
     build: { context: ., target: web }
     ports:
-      - "3000:80"
+      - "${WEB_PORT:-3000}:80"
     volumes:
       - data:/data:ro
     depends_on:
