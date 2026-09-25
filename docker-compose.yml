@@ -1,28 +1,16 @@
 # Update: docker compose pull && docker compose up -d
 services:
-  # One-shot: Docker creates a missing ./data as root, so hand it to the user the api runs as.
-  init:
-    image: ghcr.io/erebuste/personal-site-api:latest
-    container_name: personal-site-init
-    user: "0"
-    command: sh -c "mkdir -p /data/uploads && chown -R ${UID:-1000}:${GID:-1000} /data"
-    restart: "no"
-    volumes:
-      - ./data:/data
   api:
     image: ghcr.io/erebuste/personal-site-api:latest
     #image: personal-site-api:local #For testing (docker build --target api -t personal-site-api:local .)
     restart: unless-stopped
     container_name: personal-site-api
-    user: "${UID:-1000}:${GID:-1000}" # set UID/GID in .env to own ./data as your host user
     # No ports: only reachable through nginx, which is what makes X-Real-IP trustworthy.
+    # On start it creates ./data and hands it to UID/GID from .env (default 1000), then runs as that user.
     volumes:
       - ./data:/data
     env_file:
       - .env
-    depends_on:
-      init:
-        condition: service_completed_successfully
     healthcheck:
       test: wget --no-verbose --tries=1 --spider http://localhost:3001/api/session ||
         exit 1

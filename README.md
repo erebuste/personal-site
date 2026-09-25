@@ -16,7 +16,8 @@ A server only needs two files: `docker-compose.yml` and a `.env` (copy `.env.exa
 docker compose up -d
 ```
 
-`./data` is created on first start; the one-shot `init` service hands it to the api's user.
+`./data` is created on first start. The api container starts as root just long enough to hand it to
+`UID`/`GID`, then runs as that user.
 
 Out of the box the site listens on `172.17.0.1:3000`, the Docker bridge on a Linux host, for a reverse
 proxy on the same machine to forward to. For local testing, swap the two `ports:` lines in
@@ -56,7 +57,7 @@ browser ──► reverse proxy ──► web (nginx :80, published on 172.17.0.
                                                            └─ ./data: profile.json, views.json, uploads/
 ```
 
-Start order: `init` (fixes `./data` ownership, then exits) → `api` (until its healthcheck passes) → `web`.
+Start order: `api` (fixes `./data` ownership, then runs until its healthcheck passes) → `web`.
 If the api restarts, `web` restarts with it.
 
 - The **api** renders each page's `<head>` (title, embed/OG tags) from the saved profile. It also serves

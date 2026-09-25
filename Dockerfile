@@ -12,16 +12,17 @@ RUN npm run build
 FROM node:24-alpine AS api
 WORKDIR /app
 ENV NODE_ENV=production DATA_DIR=/data PORT=3001
+# su-exec: lets the entrypoint drop from root to UID:GID after fixing /data ownership.
+RUN apk add --no-cache su-exec
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev && npm cache clean --force
 COPY server ./server
 COPY src/types ./src/types
 COPY src/config ./src/config
 COPY --from=build /app/dist ./dist
-# The named volume inherits this ownership on first mount.
-RUN mkdir -p /data/uploads && chown -R node:node /data
-USER node
+# No USER: server/entrypoint.sh starts as root, hands /data to UID:GID, then runs the server as that user.
 EXPOSE 3001
+ENTRYPOINT ["sh", "/app/server/entrypoint.sh"]
 CMD ["node", "server/index.ts"]
 
 # ---- web: nginx for static assets + uploads, proxies the rest to api ----
