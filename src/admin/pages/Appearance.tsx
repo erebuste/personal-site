@@ -49,6 +49,12 @@ const TITLE_LABELS: Record<TitleAnimation, string> = {
   spinner: 'Spinner',
   heartbeat: 'Heartbeat',
   reveal: 'Center Reveal',
+  progress: 'Progress Bar',
+  clock: 'Clock',
+  moon: 'Moon Phases',
+  music: 'Music Notes',
+  'upside-down': 'Upside Down',
+  expand: 'Expand',
 };
 const TRAIL_LABELS: Record<CursorTrail, string> = {
   none: 'None',
@@ -66,6 +72,13 @@ const TRAIL_LABELS: Record<CursorTrail, string> = {
   matrix: 'Matrix',
   ripple: 'Ripples',
   confetti: 'Confetti',
+  neon: 'Neon Line',
+  orbit: 'Orbit',
+  petals: 'Sakura Petals',
+  pixels: 'Pixels',
+  smoke: 'Smoke',
+  sparks: 'Sparks',
+  notes: 'Music Notes',
 };
 const EFFECT_LABELS: Record<UsernameEffect, string> = {
   none: 'None',
@@ -82,6 +95,14 @@ const EFFECT_LABELS: Record<UsernameEffect, string> = {
   outline: 'Outline',
   float: 'Float',
   retro: 'Retro Shadow',
+  gradient: 'Theme Gradient',
+  gold: 'Gold',
+  hologram: 'Hologram',
+  shake: 'Shake',
+  swing: 'Swing',
+  jelly: 'Jelly',
+  spin: 'Spinning Letters',
+  focus: 'Focus Blur',
 };
 const TITLE_OPTIONS = TITLE_ANIMATIONS.map((value) => ({ value, label: TITLE_LABELS[value] }));
 const TRAIL_OPTIONS = CURSOR_TRAILS.map((value) => ({ value, label: TRAIL_LABELS[value] }));
@@ -117,6 +138,12 @@ const OVERLAY_LABELS: Record<PageOverlay, string> = {
   bubbles: 'Bubbles',
   stars: 'Starry Night',
   aurora: 'Aurora',
+  matrix: 'Matrix Rain',
+  meteors: 'Shooting Stars',
+  confetti: 'Confetti',
+  fog: 'Fog',
+  sunbeams: 'Sunbeams',
+  dust: 'Floating Dust',
   vignette: 'Vignette',
 };
 const ENTER_LABELS: Record<EnterAnimation, string> = {
@@ -136,6 +163,14 @@ const ENTER_LABELS: Record<EnterAnimation, string> = {
   elastic: 'Elastic Pop',
   unfold: 'Unfold',
   'glitch-in': 'Glitch In',
+  drop: 'Drop',
+  spiral: 'Spiral',
+  'card-flip': 'Card Flip',
+  jelly: 'Jelly',
+  wipe: 'Wipe',
+  iris: 'Iris',
+  skew: 'Skew In',
+  tilt: 'Tilt Up',
 };
 const OVERLAY_OPTIONS = PAGE_OVERLAYS.map((value) => ({ value, label: OVERLAY_LABELS[value] }));
 const ENTER_OPTIONS = ENTER_ANIMATIONS.map((value) => ({ value, label: ENTER_LABELS[value] }));

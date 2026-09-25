@@ -27,9 +27,9 @@ export function Username({ text, effect, theme }: { text: string; effect: Userna
   const typed = useTypewriter(text, effect === 'typewriter');
   const vars = { '--fx-accent': theme.accent, '--fx-base': theme.primaryText } as CSSProperties;
 
-  if (effect === 'wave')
+  if (effect === 'wave' || effect === 'spin')
     return (
-      <span className="fx-wave" style={vars}>
+      <span className={`fx-${effect}`} style={vars}>
         {[...text].map((ch, i) => (
           <span key={i} style={{ '--i': i } as CSSProperties}>
             {ch === ' ' ? ' ' : ch}
@@ -46,7 +46,7 @@ export function Username({ text, effect, theme }: { text: string; effect: Userna
 }
 
 /** Effects with transparent glyphs (gradient fill or outline only); a text-shadow behind them looks muddy. */
-const GRADIENT_EFFECTS: UsernameEffect[] = ['rainbow', 'shimmer', 'outline'];
+const GRADIENT_EFFECTS: UsernameEffect[] = ['rainbow', 'shimmer', 'outline', 'gradient', 'gold', 'hologram'];
 
 const SPARKLES = [
   { left: '-14%', top: '-10%', delay: '0s' },

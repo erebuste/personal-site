@@ -33,6 +33,13 @@ export const CURSOR_TRAILS = [
   'matrix',
   'ripple',
   'confetti',
+  'neon',
+  'orbit',
+  'petals',
+  'pixels',
+  'smoke',
+  'sparks',
+  'notes',
 ] as const;
 export const PAGE_OVERLAYS = [
   'none',
@@ -51,6 +58,12 @@ export const PAGE_OVERLAYS = [
   'bubbles',
   'stars',
   'aurora',
+  'matrix',
+  'meteors',
+  'confetti',
+  'fog',
+  'sunbeams',
+  'dust',
   'vignette',
 ] as const;
 export const ENTER_ANIMATIONS = [
@@ -70,6 +83,14 @@ export const ENTER_ANIMATIONS = [
   'elastic',
   'unfold',
   'glitch-in',
+  'drop',
+  'spiral',
+  'card-flip',
+  'jelly',
+  'wipe',
+  'iris',
+  'skew',
+  'tilt',
 ] as const;
 export const TITLE_ANIMATIONS = [
   'none',
@@ -85,6 +106,12 @@ export const TITLE_ANIMATIONS = [
   'spinner',
   'heartbeat',
   'reveal',
+  'progress',
+  'clock',
+  'moon',
+  'music',
+  'upside-down',
+  'expand',
 ] as const;
 export const USERNAME_EFFECTS = [
   'none',
@@ -101,6 +128,14 @@ export const USERNAME_EFFECTS = [
   'outline',
   'float',
   'retro',
+  'gradient',
+  'gold',
+  'hologram',
+  'shake',
+  'swing',
+  'jelly',
+  'spin',
+  'focus',
 ] as const;
 
 const hex = z.string().regex(/^#[0-9a-fA-F]{6}$/, 'must be a #rrggbb color');

@@ -76,6 +76,7 @@ const glyph = (char: string, color: string) => (ctx: Ctx, p: Particle) => {
 const RAINBOW = ['#fe0000', '#fd8c00', '#ffe500', '#119f0b', '#0644b3', '#c22edc'];
 const CONFETTI = ['#ff5f6d', '#ffc371', '#47e891', '#3fa7ff', '#b16cff', '#ffffff'];
 const KATAKANA = [...'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホ01'];
+const NOTES = [...'♪♫♬♩'];
 /** A stable per-particle choice, seeded by the fractional part of its random `size`. */
 const pick = (list: string[], seed: number): string => list[Math.floor((seed % 1) * list.length)] ?? '#fff';
 
@@ -258,5 +259,103 @@ export const CURSOR_EFFECTS: Record<Exclude<CursorTrail, 'none'>, (color: string
       },
       0.09,
       2,
+    ),
+
+  // A glowing tube of light following the pointer.
+  neon: (color) =>
+    chain(16, 0.5, (ctx, points, cursor) => {
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 3;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.shadowColor = color;
+      ctx.shadowBlur = 12;
+      ctx.beginPath();
+      ctx.moveTo(cursor.x, cursor.y);
+      for (const p of points) ctx.lineTo(p.x, p.y);
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+    }),
+
+  // Three dots circling a point that eases after the pointer.
+  orbit: (color) =>
+    chain(1, 0.25, (ctx, points, cursor) => {
+      const center = points[0] ?? cursor;
+      const t = performance.now() / 350;
+      ctx.fillStyle = color;
+      for (let i = 0; i < 3; i++) {
+        const a = t + (i * Math.PI * 2) / 3;
+        ctx.beginPath();
+        ctx.arc(center.x + Math.cos(a) * 14, center.y + Math.sin(a) * 14, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }),
+
+  // Sakura petals tumbling down and swaying.
+  petals: () =>
+    particles(
+      (x, y) => ({ x, y, vx: rand(-0.8, 0.8), vy: rand(0.2, 0.8), life: 1.2, size: rand(0, 1), decay: 0.012 }),
+      (ctx, p) => {
+        ctx.save();
+        ctx.translate(p.x + Math.sin(p.life * 6) * 6, p.y);
+        ctx.rotate(p.life * 4 + p.size * 6);
+        ctx.fillStyle = p.size > 0.5 ? '#ffb7c9' : '#ffd6e0';
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 5, 3, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      },
+      0.01,
+      3,
+    ),
+
+  // Chunky 8-bit pixels snapped to a grid, dropping away.
+  pixels: (color) =>
+    particles(
+      (x, y) => ({ x: Math.round(x / 6) * 6, y: Math.round(y / 6) * 6, vx: 0, vy: rand(0.2, 1), life: 1, size: 6, decay: 0.03 }),
+      (ctx, p) => {
+        ctx.fillStyle = color;
+        ctx.fillRect(p.x - p.size / 2, Math.round(p.y / 6) * 6 - p.size / 2, p.size, p.size);
+      },
+      0.03,
+      2,
+    ),
+
+  // Soft grey puffs that rise and spread out.
+  smoke: () =>
+    particles(
+      (x, y) => ({ x, y, vx: rand(-0.3, 0.3), vy: rand(-0.8, -0.3), life: 1, size: rand(4, 8), decay: 0.012 }),
+      (ctx, p) => {
+        ctx.globalAlpha *= 0.25;
+        ctx.fillStyle = '#c8c8d0';
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size + (1 - p.life) * 16, 0, Math.PI * 2);
+        ctx.fill();
+      },
+      -0.005,
+      2,
+    ),
+
+  // Sparks thrown out and falling, drawn as short streaks along their motion.
+  sparks: (color) =>
+    particles(
+      (x, y) => ({ x, y, vx: rand(-3, 3), vy: rand(-3, 1), life: 1, size: 0, decay: 0.035 }),
+      (ctx, p) => {
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(p.x, p.y);
+        ctx.lineTo(p.x - p.vx * 3, p.y - p.vy * 3);
+        ctx.stroke();
+      },
+      0.15,
+    ),
+
+  notes: (color) =>
+    particles(
+      (x, y) => ({ x, y, vx: rand(-0.6, 0.6), vy: rand(-1.4, -0.6), life: 1, size: rand(12, 18), decay: 0.015 }),
+      (ctx, p) => glyph(pick(NOTES, p.size), color)(ctx, p),
+      -0.01,
+      3,
     ),
 };

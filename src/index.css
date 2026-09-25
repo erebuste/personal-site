@@ -110,6 +110,50 @@ body {
   72% { transform: translateX(-2px); clip-path: inset(18% 0 0 0); }
   86% { transform: none; clip-path: inset(0); }
 }
+.enter-drop { animation-name: enter-drop; animation-timing-function: ease-out; }
+.enter-spiral { animation-name: enter-spiral; }
+.enter-card-flip { animation-name: enter-card-flip; animation-timing-function: ease-out; }
+.enter-jelly { animation-name: enter-jelly; animation-timing-function: ease-out; }
+.enter-wipe { animation-name: enter-wipe; animation-timing-function: ease-in-out; }
+.enter-iris { animation-name: enter-iris; animation-timing-function: ease-in-out; }
+.enter-skew { animation-name: enter-skew; animation-timing-function: ease-out; }
+.enter-tilt { animation-name: enter-tilt; }
+/* Falls in from above and settles with two small bounces. */
+@keyframes enter-drop {
+  0% { opacity: 0; transform: translateY(-70px); }
+  50% { opacity: 1; transform: none; }
+  68% { transform: translateY(-14px); }
+  84% { transform: none; }
+  92% { transform: translateY(-4px); }
+  100% { transform: none; }
+}
+@keyframes enter-spiral { from { opacity: 0; transform: rotate(-200deg) scale(0.2); } }
+/* Turns in edge-first like a playing card, overshooting slightly. */
+@keyframes enter-card-flip {
+  0% { opacity: 0; transform: perspective(1200px) rotateY(-90deg); }
+  60% { opacity: 1; transform: perspective(1200px) rotateY(12deg); }
+  100% { transform: none; }
+}
+/* Squashes and stretches before settling. */
+@keyframes enter-jelly {
+  0% { opacity: 0; transform: scale(0.6); }
+  30% { opacity: 1; transform: scale(1.12, 0.88); }
+  45% { transform: scale(0.92, 1.08); }
+  60% { transform: scale(1.05, 0.95); }
+  75% { transform: scale(0.98, 1.02); }
+  100% { transform: none; }
+}
+/* Revealed left to right. */
+@keyframes enter-wipe { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0); } }
+/* A circle opening from the middle; ~71% of the reference radius reaches the corners. */
+@keyframes enter-iris { from { clip-path: circle(0% at 50% 50%); } to { clip-path: circle(75% at 50% 50%); } }
+@keyframes enter-skew {
+  0% { opacity: 0; transform: translateX(-60px) skewX(20deg); }
+  60% { opacity: 1; transform: translateX(8px) skewX(-6deg); }
+  100% { transform: none; }
+}
+/* Rises up out of the floor, tipped back in 3D. */
+@keyframes enter-tilt { from { opacity: 0; transform: perspective(1000px) rotateX(50deg) translateY(60px) scale(0.9); } }
 
 /* ---- Page overlays (<div class="page-overlay overlay-*">), purely decorative ---- */
 :root {
@@ -392,6 +436,106 @@ body {
   to { transform: translateX(6%) rotate(3deg) scaleY(1.15); }
 }
 
+/* Matrix rain: vertical columns of green glyphs sliding down, faded at their tails. */
+.matrix-drop {
+  position: absolute;
+  top: 0;
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  font: calc(var(--size) * 0.9) / 1.05 monospace;
+  color: #3dff7a;
+  text-shadow: 0 0 6px rgb(61 255 122 / 0.6);
+  mask-image: linear-gradient(transparent, #000 75%);
+  opacity: 0.5;
+  animation: matrix-fall calc(var(--fall) * 0.5) linear var(--delay) infinite;
+}
+.matrix-drop::before { content: 'アカサタナハマヤラワ01ｱｲｳ'; }
+.matrix-drop:nth-child(3n + 1)::before { content: 'ﾈﾎ10ﾓﾐﾑﾒｾｿﾀﾁ7ﾂﾃ'; }
+.matrix-drop:nth-child(3n + 2)::before { content: '01ツテトナニヌ9ネノ'; }
+/* Starts fully above the box and ends fully below it, whatever the column's height. */
+@keyframes matrix-fall {
+  from { top: 0; transform: translateY(-100%); }
+  to { top: 100%; transform: none; }
+}
+
+/* Shooting stars: short bright streaks crossing diagonally, each visible for ~10% of its cycle. */
+.meteor {
+  position: absolute;
+  top: calc(var(--top) * 0.6);
+  width: calc(var(--size) * 8);
+  height: 1.5px;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, #fff, rgb(255 255 255 / 0));
+  rotate: -35deg;
+  opacity: 0;
+  animation: meteor-streak var(--fall) linear var(--delay) infinite;
+}
+@keyframes meteor-streak {
+  0% { opacity: 0; translate: 0 0; }
+  2% { opacity: 1; }
+  10%, 100% { opacity: 0; translate: -290px 200px; }
+}
+
+/* Confetti: the sakura motion with colored paper strips. */
+.sakura-petal.confetti {
+  width: calc(var(--size) * 0.5);
+  height: var(--size);
+  border-radius: 1px;
+  background: #ff5f6d;
+  box-shadow: none;
+}
+.sakura-petal.confetti:nth-child(5n + 1) { background: #ffc371; }
+.sakura-petal.confetti:nth-child(5n + 2) { background: #47e891; }
+.sakura-petal.confetti:nth-child(5n + 3) { background: #3fa7ff; }
+.sakura-petal.confetti:nth-child(5n + 4) { background: #b16cff; }
+
+/* Floating dust: the firefly drift, smaller, white and dimmer. */
+.firefly.dust {
+  width: calc(var(--size) / 5);
+  height: calc(var(--size) / 5);
+  background: #fff;
+  box-shadow: 0 0 4px 1px rgb(255 255 255 / 0.3);
+  opacity: 0.5;
+}
+
+/* Fog: soft grey banks drifting sideways near the bottom. */
+.overlay-fog::before,
+.overlay-fog::after {
+  inset: 0 -50%;
+  background:
+    radial-gradient(ellipse 30% 22% at 20% 75%, rgb(215 220 232 / 0.13), transparent 70%),
+    radial-gradient(ellipse 35% 25% at 58% 88%, rgb(215 220 232 / 0.15), transparent 70%),
+    radial-gradient(ellipse 25% 18% at 85% 65%, rgb(215 220 232 / 0.1), transparent 70%);
+  animation: fog-drift 40s ease-in-out infinite alternate;
+}
+.overlay-fog::after {
+  top: -20%;
+  opacity: 0.8;
+  animation-duration: 28s;
+  animation-direction: alternate-reverse;
+}
+@keyframes fog-drift {
+  from { transform: translateX(-15%); }
+  to { transform: translateX(15%); }
+}
+
+/* Sunbeams: warm rays fanning from the top-left corner, slowly swaying. */
+.overlay-sunbeams { background: radial-gradient(circle at 0 0, rgb(255 220 150 / 0.12), transparent 60%); }
+.overlay-sunbeams::before {
+  top: 0;
+  left: 0;
+  width: 250vmax;
+  height: 250vmax;
+  translate: -50% -50%;
+  background: repeating-conic-gradient(rgb(255 236 190 / 0.07) 0deg 4deg, transparent 4deg 15deg);
+  mask-image: radial-gradient(closest-side, #000 15%, transparent);
+  animation: rays-sway 20s ease-in-out infinite alternate;
+}
+@keyframes rays-sway {
+  from { rotate: -8deg; }
+  to { rotate: 8deg; }
+}
+
 /* Vignette: darkened edges. */
 .overlay-vignette {
   background: radial-gradient(ellipse at center, transparent 40%, rgb(0 0 0 / 0.75) 100%);
@@ -414,7 +558,10 @@ body {
 }
 
 .fx-rainbow,
-.fx-shimmer {
+.fx-shimmer,
+.fx-gradient,
+.fx-gold,
+.fx-hologram {
   background-clip: text;
   -webkit-background-clip: text;
   color: transparent;
@@ -510,6 +657,67 @@ body {
   animation: fx-retro 2.5s ease-in-out infinite;
 }
 @keyframes fx-retro { 50% { text-shadow: 3px 3px 0 var(--fx-accent), 6px 6px 0 rgb(0 0 0 / 0.45); } }
+
+/* Gradient text effects share the .fx-rainbow clip/pan rule above. */
+.fx-gradient {
+  background-image: linear-gradient(90deg, var(--fx-accent), var(--fx-base), var(--fx-accent));
+  background-size: 200% auto;
+}
+.fx-gold {
+  background-image: linear-gradient(110deg, #b8860b 20%, #ffe58a 40%, #fff6c9 50%, #ffe58a 60%, #b8860b 80%);
+  background-size: 250% auto;
+  animation-duration: 3.5s;
+}
+/* Hologram: accent scanlines scrolling through the letters, with a flicker and glow. */
+.fx-hologram {
+  background-image: repeating-linear-gradient(0deg, var(--fx-accent) 0 2px, color-mix(in srgb, var(--fx-accent) 35%, transparent) 2px 3px);
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--fx-accent) 60%, transparent));
+  animation: fx-holo 1.2s linear infinite, fx-flicker 5s linear infinite;
+}
+@keyframes fx-holo { to { background-position: 0 30px; } }
+
+/* Shake: a quick jitter every few seconds. */
+.fx-shake { display: inline-block; animation: fx-shake 4s linear infinite; }
+@keyframes fx-shake {
+  0%, 88%, 100% { transform: none; }
+  90% { transform: translate(-2px, 1px) rotate(-1deg); }
+  92% { transform: translate(2px, -1px) rotate(1deg); }
+  94% { transform: translate(-2px, 0); }
+  96% { transform: translate(1px, 1px); }
+  98% { transform: translate(-1px, 0); }
+}
+
+/* Swing: hangs from its top edge and rocks. */
+.fx-swing { display: inline-block; transform-origin: 50% 0; animation: fx-swing 2.4s ease-in-out infinite; }
+@keyframes fx-swing {
+  0%, 100% { rotate: -4deg; }
+  50% { rotate: 4deg; }
+}
+
+/* Jelly: a squash-and-stretch wobble, then rest. */
+.fx-jelly { display: inline-block; animation: fx-jelly 2.5s ease-in-out infinite; }
+@keyframes fx-jelly {
+  0%, 40%, 100% { transform: none; }
+  10% { transform: scale(1.15, 0.85); }
+  18% { transform: scale(0.9, 1.1); }
+  26% { transform: scale(1.05, 0.95); }
+  34% { transform: scale(0.98, 1.02); }
+}
+
+/* Spinning letters: each letter turns a full circle, staggered left to right (same markup as wave). */
+.fx-spin > span {
+  display: inline-block;
+  animation: fx-spin 3s ease-in-out infinite;
+  animation-delay: calc(var(--i) * 100ms);
+}
+@keyframes fx-spin {
+  0% { transform: rotateY(0); }
+  30%, 100% { transform: rotateY(360deg); }
+}
+
+/* Focus: drifts slightly out of focus and back. */
+.fx-focus { animation: fx-focus 3s ease-in-out infinite; }
+@keyframes fx-focus { 50% { filter: blur(1.5px); opacity: 0.75; } }
 
 /* Admin sliders: gradient-filled track up to --fill (set inline), white thumb with a violet halo. */
 .fc-range {

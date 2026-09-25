@@ -13,6 +13,10 @@ const PARTICLE_CLASSES: Partial<Record<PageOverlay, string>> = {
   embers: 'ember',
   hearts: 'heart',
   bubbles: 'bubble',
+  matrix: 'matrix-drop',
+  meteors: 'meteor',
+  confetti: 'sakura-petal confetti',
+  dust: 'firefly dust',
 };
 
 /** Randomised once per mount so every particle moves at its own pace. */

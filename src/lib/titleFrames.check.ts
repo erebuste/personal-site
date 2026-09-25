@@ -21,5 +21,9 @@ assert.deepEqual(TITLE_FRAMES.dots('ab'), ['ab', 'ab.', 'ab..', 'ab...']);
 assert.deepEqual(TITLE_FRAMES.reveal('abc').slice(0, 3), ['b', 'ab', 'abc']);
 assert.equal(TITLE_FRAMES.reveal('a b')[0], '⠀'); // middle char is a space: blank, not an empty-looking title
 assert.ok(TITLE_FRAMES.bounce('ab').every((f) => f.endsWith('ab')));
+assert.deepEqual([TITLE_FRAMES.progress('ab')[0], TITLE_FRAMES.progress('ab').at(-1)], ['▱▱▱▱▱ ab', '▰▰▰▰▰ ab']);
+assert.equal(TITLE_FRAMES['upside-down']('Hi!').at(-1), '!ᴉɥ');
+assert.ok(TITLE_FRAMES.expand('ab').includes('a⠀b'));
+assert.equal(TITLE_FRAMES.clock('ab').length, 12);
 
 console.log('titleFrames: all checks passed');
