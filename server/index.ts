@@ -13,8 +13,17 @@ import { UPLOAD_DIR, countView, getProfile, saveProfile, stats } from './store.t
 
 const PORT = Number(process.env.PORT ?? 3001);
 const PASSWORD = process.env.ADMIN_PASSWORD ?? '';
-// Without a fixed secret, sessions just end when the server restarts.
-const SECRET = process.env.SESSION_SECRET || randomBytes(32).toString('hex');
+// Signs the session cookie, so a short or guessable one lets anyone forge an admin login.
+const ENV_SECRET = process.env.SESSION_SECRET ?? '';
+if (ENV_SECRET.length < 32) {
+  const problem = 'SESSION_SECRET is missing or shorter than 32 characters (generate one with: openssl rand -hex 32)';
+  if (process.env.NODE_ENV === 'production') {
+    console.error(problem);
+    process.exit(1);
+  }
+  console.warn(`${problem}. Using a random one for now: sessions end when the server restarts.`);
+}
+const SECRET = ENV_SECRET.length >= 32 ? ENV_SECRET : randomBytes(32).toString('hex');
 const SECURE_COOKIE = process.env.COOKIE_SECURE === 'true';
 const DIST = join(import.meta.dirname, '..', 'dist');
 const SESSION_MS = 7 * 86_400_000;
