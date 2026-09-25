@@ -61,6 +61,10 @@ If the api restarts, `web` restarts with it.
 
 - The **api** renders each page's `<head>` (title, embed/OG tags) from the saved profile. It also serves
   `/api/*`: profile, login/logout, uploads (100 MB max), view counter and Discord presence.
+- **Link previews:** unless you upload a Large Image under Profile Embed, the preview image is
+  `/api/og.png`. It's a 1200×630 card drawn from your avatar, name, bio, colors and background
+  (`server/og.ts`, satori + resvg). It's rendered once per profile change, and the `?v=` in its URL
+  makes Discord and others refetch it after you save.
 - It is only reachable through nginx, which is why it can trust `X-Real-IP` for login rate-limiting.
 - All settings are validated against a single zod schema (`src/types/index.ts`) on both save and load.
 
@@ -101,6 +105,7 @@ npm run dev                         # Vite on :5173, proxies /api and /uploads t
 | `npm run build` | Type-check and build the frontend into `dist/` |
 | `npm run typecheck` | Type-check only |
 | `node src/lib/titleFrames.check.ts` | Title-animation frame checks |
+| `node server/og.check.ts` | Link-preview card checks (size, fallbacks, path safety, caching) |
 | `node server/discord.check.ts` | Discord bot checks against a fake gateway (never contacts Discord) |
 | `BASE=http://localhost:3000 ADMIN_PASSWORD=… node server/smoke.ts` | End-to-end smoke test (login, CSRF, validation, persistence) |
 

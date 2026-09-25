@@ -9,9 +9,12 @@ import { Button, ColorInput, Field, Grid, Info, PageHeader, Section, Select, Tex
 // ---- Profile Embed ----
 
 export function EmbedPage() {
-  const { draft, update } = useAdmin();
+  const { draft, saved, update } = useAdmin();
   const { embed, user } = draft;
   const time = new Date().toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' });
+  // The generated card is drawn from the saved profile; this cache-buster refetches it after each save.
+  const cardVersion = [...JSON.stringify(saved)].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) | 0, 0);
+  const image = embed.image ?? `/api/og.png?v=${cardVersion}`;
 
   return (
     <div className="space-y-6">
@@ -27,19 +30,17 @@ export function EmbedPage() {
             </p>
             <p className="truncate text-sm text-[#00a8fc]">{embed.siteUrl}</p>
             <div className="mt-2 max-w-[520px] rounded border-l-4 bg-[#2b2d31] p-3" style={{ borderColor: embed.color }}>
-              <div className="flex gap-3">
-                <div className="min-w-0 flex-1">
-                  {embed.siteName && <p className="text-[11px] text-[#b5bac1]">{embed.siteName}</p>}
-                  <p className="text-sm font-semibold text-[#00a8fc]">{embed.title}</p>
-                  {embed.description && <p className="mt-1 text-xs whitespace-pre-line">{embed.description}</p>}
-                </div>
-                {!embed.image && <img src={user.avatarUrl} alt="" className="size-16 shrink-0 rounded object-cover" />}
-              </div>
-              {embed.image && <img src={embed.image} alt="" className="mt-3 max-h-[260px] w-full rounded object-cover" />}
+              {embed.siteName && <p className="text-[11px] text-[#b5bac1]">{embed.siteName}</p>}
+              <p className="text-sm font-semibold text-[#00a8fc]">{embed.title}</p>
+              {embed.description && <p className="mt-1 text-xs whitespace-pre-line">{embed.description}</p>}
+              <img src={image} alt="" className="mt-3 aspect-[1200/630] w-full rounded bg-black/30 object-cover" />
             </div>
           </div>
         </div>
-        <Info>Discord caches previews, so changes can take a while to show up there.</Info>
+        <Info>
+          Without a Large Image, a card is generated from your saved profile (avatar, name, bio, colors and background).
+          Discord caches previews, so changes can take a while to show up there.
+        </Info>
       </Section>
 
       <Section title="Details">

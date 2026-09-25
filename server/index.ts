@@ -9,6 +9,7 @@ import { deleteCookie, getCookie, setCookie } from 'hono/cookie';
 import { csrf } from 'hono/csrf';
 import { profileSchema, type ProfileConfig, type PublicProfileResponse } from '../src/types/index.ts';
 import { startPresenceBot } from './discord.ts';
+import { ogImage, ogVersion } from './og.ts';
 import { UPLOAD_DIR, countView, getProfile, saveProfile, stats } from './store.ts';
 
 const PORT = Number(process.env.PORT ?? 3001);
@@ -71,8 +72,10 @@ function allowLoginAttempt(ip: string): boolean {
 const esc = (s: string) =>
   s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-function headTags({ page, embed, user }: ProfileConfig): string {
-  const image = new URL(embed.image ?? user.avatarUrl, embed.siteUrl).href;
+function headTags(profile: ProfileConfig): string {
+  const { page, embed, user } = profile;
+  // An uploaded Large Image wins; otherwise the generated card, versioned so crawlers refetch it after changes.
+  const image = new URL(embed.image ?? `/api/og.png?v=${ogVersion(profile)}`, embed.siteUrl).href;
   const meta: [string, string][] = [
     ['theme-color', embed.color],
     ['og:site_name', embed.siteName],
@@ -80,7 +83,9 @@ function headTags({ page, embed, user }: ProfileConfig): string {
     ['og:description', embed.description],
     ['og:url', embed.siteUrl],
     ['og:image', image],
-    ['twitter:card', embed.image ? 'summary_large_image' : 'summary'],
+    ['og:image:width', embed.image ? '' : '1200'],
+    ['og:image:height', embed.image ? '' : '630'],
+    ['twitter:card', 'summary_large_image'],
   ];
   return [
     `<title>${esc(page.title)}</title>`,
@@ -152,6 +157,8 @@ app.get('/api/presence', async (c) => {
   const data = getPresence && enabled && userId ? await getPresence(userId) : null;
   return data ? c.json(data, 200, { 'Cache-Control': 'no-store' }) : c.json({ error: 'Presence unavailable.' }, 404);
 });
+
+app.get('/api/og.png', async (c) => c.body(new Uint8Array(await ogImage(getProfile())), 200, { 'Content-Type': 'image/png' }));
 
 app.use('/api/admin/*', async (c, next) => {
   if (!isAuthed(c)) return c.json({ error: 'Not logged in.' }, 401);
