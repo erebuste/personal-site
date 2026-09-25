@@ -39,10 +39,19 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Under the reveal screen: laid out, loaded and already drawn, but not visible yet (see App.tsx).
+   opacity 0 would make the browser skip drawing it, leaving the first draw (the glass blur especially, 100ms+)
+   for right after the click, mid-animation. 0.001 still rounds to fully transparent on screen; will-change keeps
+   it on its own layer, so the drawn result carries straight into the enter animation. */
+.pre-reveal { opacity: 0.001; will-change: opacity, transform; }
+
 /* ---- Page enter animations (<main class="enter enter-*">), duration via --enter-ms ---- */
 /* `backwards`, not `both`: a lingering opacity/filter animation makes <main> a backdrop root,
    which stops backdrop-filter on the glass boxes from seeing the page background. */
 .enter {
+  /* Same layer as .pre-reveal, so nothing is redrawn at the click. App.tsx drops .enter when the animation ends:
+     will-change also makes <main> a backdrop root, which the glass boxes must not stay under. */
+  will-change: opacity, transform;
   animation-duration: var(--enter-ms, 350ms);
   animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
   animation-fill-mode: backwards;

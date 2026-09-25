@@ -26,6 +26,7 @@ interface Props {
 export default function App({ profile, views }: Props) {
   const { user, links, showcases, audio, theme, box, background, page, discordPresence } = profile;
   const [revealed, setRevealed] = useState(!page.reveal.enabled);
+  const [entered, setEntered] = useState(false); // enter animation finished; see .enter in index.css
   const audioRef = useRef<HTMLAudioElement>(null);
 
   // play() must run inside the click handler to satisfy browser autoplay policies.
@@ -45,20 +46,24 @@ export default function App({ profile, views }: Props) {
         trailColor={theme.accent}
       />
 
-      {revealed ? (
-        <main
-          className={`relative z-10 flex min-h-dvh flex-col items-center justify-center gap-6.5 px-4 py-10 ${page.enterAnimation === 'none' ? '' : `enter enter-${page.enterAnimation}`}`}
-          style={{ '--enter-ms': `${page.enterAnimationMs}ms` } as CSSProperties}
-        >
-          <ProfileCard user={user} box={box} theme={theme} views={page.showViews ? views : undefined}>
-            <SocialLinks links={links} theme={theme} />
-            {showcases.length > 0 && <Showcases items={showcases} box={box} theme={theme} />}
-          </ProfileCard>
-          {discordPresence.enabled && <DiscordPresence box={box} theme={theme} />}
-        </main>
-      ) : (
-        <ClickToEnterOverlay text={page.reveal.text} blur={page.reveal.blur} onEnter={reveal} />
-      )}
+      {/* Rendered from the start, hidden under the reveal screen, so layout, images and fonts are ready before the
+          click. Mounting it on click instead made the first frame so heavy that short enter animations were half over
+          before anything was painted. */}
+      <main
+        inert={!revealed}
+        className={`relative z-10 flex min-h-dvh flex-col items-center justify-center gap-6.5 px-4 py-10 ${
+          !revealed ? 'pre-reveal' : entered || page.enterAnimation === 'none' ? '' : `enter enter-${page.enterAnimation}`
+        }`}
+        style={{ '--enter-ms': `${page.enterAnimationMs}ms` } as CSSProperties}
+        onAnimationEnd={(e) => e.target === e.currentTarget && setEntered(true)} // not the children's own animations
+      >
+        <ProfileCard user={user} box={box} theme={theme} views={page.showViews ? views : undefined}>
+          <SocialLinks links={links} theme={theme} />
+          {showcases.length > 0 && <Showcases items={showcases} box={box} theme={theme} />}
+        </ProfileCard>
+        {discordPresence.enabled && <DiscordPresence box={box} theme={theme} />}
+      </main>
+      {!revealed && <ClickToEnterOverlay text={page.reveal.text} blur={page.reveal.blur} onEnter={reveal} />}
 
       {audio.src && (
         <AudioPlayer
