@@ -265,7 +265,8 @@ function Shell({ onLogout }: { onLogout: () => void }) {
   };
 
   const CurrentPage = PAGES[page];
-  const host = URL.canParse(saved.embed.siteUrl) ? new URL(saved.embed.siteUrl).host : saved.embed.siteUrl;
+  // The link below opens "/" on this origin, so label it with this origin (embed.siteUrl may still be the default).
+  const host = location.host;
   const logout = () => void api('/api/logout', { method: 'POST' }).finally(onLogout);
 
   return (
