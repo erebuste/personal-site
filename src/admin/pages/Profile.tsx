@@ -29,7 +29,7 @@ function AvatarField() {
         type="button"
         onClick={() => input.current?.click()}
         title="Change avatar"
-        className="group relative size-20 shrink-0 cursor-pointer overflow-hidden rounded-full ring-2 ring-adm-violet/50 ring-offset-4 ring-offset-adm-panel"
+        className="group relative size-20 shrink-0 cursor-pointer overflow-hidden rounded-full ring-2 ring-adm-accent/50 ring-offset-4 ring-offset-adm-panel"
       >
         <img src={draft.user.avatarUrl} alt="Avatar" className="size-full object-cover" />
         <span className="absolute inset-0 grid place-items-center bg-black/60 opacity-0 transition-opacity group-hover:opacity-100">

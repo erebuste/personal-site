@@ -64,17 +64,9 @@ const pageFromPath = (): Page => {
 type Session = { authed: boolean; enabled: boolean };
 type Toast = { message: string; tone: 'ok' | 'error' };
 
-/** Page background with a faint violet/pink glow in opposite corners. */
+/** Plain dark page background. */
 function Backdrop({ children }: { children: ReactNode }) {
-  return (
-    <div className="adm relative min-h-dvh bg-adm-bg font-ui text-adm-text">
-      <div
-        aria-hidden
-        className="pointer-events-none fixed inset-0 bg-[radial-gradient(60rem_40rem_at_85%_-10%,rgb(139_92_246/0.14),transparent),radial-gradient(45rem_30rem_at_-5%_110%,rgb(236_72_153/0.08),transparent)]"
-      />
-      <div className="relative">{children}</div>
-    </div>
-  );
+  return <div className="adm min-h-dvh bg-adm-bg font-ui text-adm-text">{children}</div>;
 }
 
 export default function Admin() {
@@ -123,7 +115,7 @@ function Login({ enabled, onLogin }: { enabled: boolean; onLogin: () => void }) 
       <div className="grid min-h-dvh place-items-center px-4">
         <form
           onSubmit={submit}
-          className="w-full max-w-sm space-y-6 rounded-2xl border border-adm-line bg-adm-panel/80 p-8 shadow-2xl shadow-adm-violet/10 backdrop-blur-xl"
+          className="w-full max-w-sm space-y-6 rounded-2xl border border-adm-line bg-adm-panel p-8 shadow-2xl shadow-black/40"
         >
           <div className="flex flex-col items-center text-center">
             <Logo className="size-12" />
@@ -139,7 +131,7 @@ function Login({ enabled, onLogin }: { enabled: boolean; onLogin: () => void }) 
               autoFocus
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="h-11 w-full rounded-lg border border-adm-line bg-adm-field px-3 text-sm outline-none focus:border-adm-violet focus:ring-2 focus:ring-adm-violet/25"
+              className="h-11 w-full rounded-lg border border-adm-line bg-adm-field px-3 text-sm outline-none focus:border-adm-accent focus:ring-2 focus:ring-adm-accent/25"
             />
           </Field>
           {error && <p className="text-sm text-adm-danger">{error}</p>}
@@ -283,7 +275,7 @@ function Shell({ onLogout }: { onLogout: () => void }) {
             <button type="button" onClick={() => state.go('dashboard')} className="flex cursor-pointer items-center gap-2.5">
               <Logo className="size-8" />
               <span className="font-sans text-[15px] font-bold tracking-tight">{saved.user.username}</span>
-              <span className="rounded-md bg-adm-violet/15 px-1.5 py-0.5 text-[10px] font-semibold text-violet-300">admin</span>
+              <span className="rounded-md bg-adm-accent/15 px-1.5 py-0.5 text-[10px] font-semibold text-adm-accent-soft">admin</span>
             </button>
             <button type="button" aria-label="Close menu" onClick={() => setMenuOpen(false)} className="text-adm-muted md:hidden">
               <X className="size-5" />
@@ -304,13 +296,13 @@ function Shell({ onLogout }: { onLogout: () => void }) {
                       aria-current={active ? 'page' : undefined}
                       className={cx(
                         'relative mb-0.5 flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors',
-                        active ? 'bg-adm-violet/12 text-adm-text' : 'text-adm-muted hover:bg-white/[0.04] hover:text-adm-text',
+                        active ? 'bg-adm-accent/12 text-adm-text' : 'text-adm-muted hover:bg-white/[0.04] hover:text-adm-text',
                       )}
                     >
                       {active && (
-                        <span className="absolute inset-y-1.5 left-0 w-0.5 rounded-full bg-linear-to-b from-adm-violet to-adm-pink" />
+                        <span className="absolute inset-y-1.5 left-0 w-0.5 rounded-full bg-adm-accent" />
                       )}
-                      <Icon className={cx('size-4', active && 'text-violet-300')} />
+                      <Icon className={cx('size-4', active && 'text-adm-accent-soft')} />
                       {label}
                     </button>
                   );
@@ -321,7 +313,7 @@ function Shell({ onLogout }: { onLogout: () => void }) {
 
           <div className="border-t border-adm-line p-3">
             <div className="flex items-center gap-3 rounded-xl p-2">
-              <img src={saved.user.avatarUrl} alt="" className="size-9 rounded-full object-cover ring-2 ring-adm-violet/40" />
+              <img src={saved.user.avatarUrl} alt="" className="size-9 rounded-full object-cover ring-2 ring-adm-accent/40" />
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-semibold">{saved.user.username}</p>
                 <a
@@ -368,7 +360,7 @@ function Shell({ onLogout }: { onLogout: () => void }) {
           <div className="animate-fade-in pointer-events-none fixed inset-x-0 bottom-0 z-30 flex justify-center px-4 pb-5 md:pl-64">
             <div className="pointer-events-auto flex w-full max-w-3xl items-center justify-between gap-3 rounded-2xl border border-adm-line-strong bg-adm-panel/90 px-4 py-3 shadow-2xl shadow-black/50 backdrop-blur-xl sm:mx-8">
               <p className="flex items-center gap-2 text-sm text-adm-muted">
-                <span className="size-2 animate-pulse rounded-full bg-adm-pink" /> Unsaved changes
+                <span className="size-2 animate-pulse rounded-full bg-adm-accent" /> Unsaved changes
               </p>
               <div className="flex gap-2">
                 <Button tone="ghost" onClick={state.reset} disabled={saving}>

@@ -3,35 +3,27 @@ import { ChevronDown, ImagePlus, Music, Sparkles, TriangleAlert } from 'lucide-r
 import { Media } from '../components/Media';
 import { errorMessage, useAdmin, type UploadKind } from './state';
 
-// Admin building blocks, "Midnight Purple". Colors come from the --color-adm-* tokens in index.css.
+// Admin building blocks: dark with a flat lilac accent, no gradients. Colors come from the --color-adm-* tokens in index.css.
 
 export const cx = (...classes: (string | false | null | undefined)[]) => classes.filter(Boolean).join(' ');
 
 const fieldClass =
-  'h-10 w-full rounded-lg border border-adm-line bg-adm-field px-3 text-sm text-adm-text outline-none transition-colors placeholder:text-adm-dim focus:border-adm-violet focus:ring-2 focus:ring-adm-violet/25';
+  'h-10 w-full rounded-lg border border-adm-line bg-adm-field px-3 text-sm text-adm-text outline-none transition-colors placeholder:text-adm-dim focus:border-adm-accent focus:ring-2 focus:ring-adm-accent/25';
 
-/** Gradient "T" with a sparkle. */
+/** Lilac tile with a "T" and a sparkle. */
 export function Logo({ className = 'size-8' }: { className?: string }) {
-  const id = `logo${useId().replace(/[^a-zA-Z0-9]/g, '')}`;
   return (
     <svg viewBox="0 0 32 32" className={className} aria-hidden>
-      <defs>
-        <linearGradient id={id} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#8b5cf6" />
-          <stop offset="1" stopColor="#ec4899" />
-        </linearGradient>
-      </defs>
-      <rect width="32" height="32" rx="9" fill={`url(#${id})`} />
-      <path d="M9 10.5h14V14h-5.25v10h-3.5V14H9z" fill="#fff" />
-      <path d="M25 3.6l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z" fill="#fff" />
+      <rect width="32" height="32" rx="9" className="fill-adm-accent" />
+      <path d="M9 10.5h14V14h-5.25v10h-3.5V14H9z" className="fill-adm-on-accent" />
+      <path d="M25 3.6l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z" className="fill-adm-on-accent" />
     </svg>
   );
 }
 
 type Tone = 'primary' | 'secondary' | 'danger' | 'ghost';
 const TONES: Record<Tone, string> = {
-  primary:
-    'bg-linear-to-r from-adm-violet to-adm-pink text-white shadow-lg shadow-adm-violet/25 hover:brightness-110',
+  primary: 'bg-adm-accent font-semibold text-adm-on-accent hover:bg-adm-accent-soft',
   secondary: 'border border-adm-line bg-adm-field text-adm-text hover:border-adm-line-strong',
   danger: 'border border-adm-danger/40 bg-adm-danger/10 text-adm-danger hover:bg-adm-danger/20',
   ghost: 'text-adm-muted hover:bg-white/5 hover:text-adm-text',
@@ -100,11 +92,11 @@ export function Info({ tone = 'info', children }: { tone?: 'info' | 'warn'; chil
     <div
       className={cx(
         'flex items-start gap-3 rounded-xl border px-4 py-3 text-[13px] leading-relaxed',
-        tone === 'info' ? 'border-adm-violet/30 bg-adm-violet/10' : 'border-amber-500/30 bg-amber-500/10',
+        tone === 'info' ? 'border-adm-accent/30 bg-adm-accent/10' : 'border-amber-500/30 bg-amber-500/10',
       )}
     >
       {tone === 'info' ? (
-        <Sparkles className="mt-0.5 size-4 shrink-0 text-violet-300" />
+        <Sparkles className="mt-0.5 size-4 shrink-0 text-adm-accent-soft" />
       ) : (
         <TriangleAlert className="mt-0.5 size-4 shrink-0 text-amber-300" />
       )}
@@ -132,7 +124,7 @@ export function Field({ label, required, counter, hint, htmlFor, children }: Fie
       <div className="mb-2 flex items-end justify-between gap-2">
         <label htmlFor={htmlFor} className="text-[13px] font-medium text-adm-text">
           {label}
-          {required && <span className="text-adm-pink"> *</span>}
+          {required && <span className="text-adm-accent"> *</span>}
         </label>
         {counter !== undefined && <span className="text-[11px] text-adm-dim tabular-nums">{counter}</span>}
       </div>
@@ -201,7 +193,7 @@ export function TextArea({
           {preview && (
             <button
               type="button"
-              className="cursor-pointer font-medium text-violet-300 hover:text-violet-200"
+              className="cursor-pointer font-medium text-adm-accent-soft hover:text-adm-accent"
               onClick={() => setPreviewing(!previewing)}
             >
               {previewing ? 'Edit' : 'Preview'}
@@ -396,7 +388,7 @@ export function Toggle({
         onClick={() => onChange(!checked)}
         className={cx(
           'relative h-6 w-11 shrink-0 cursor-pointer rounded-full border transition-colors',
-          checked ? 'border-transparent bg-linear-to-r from-adm-violet to-adm-pink' : 'border-adm-line bg-adm-field',
+          checked ? 'border-transparent bg-adm-accent' : 'border-adm-line bg-adm-field',
         )}
       >
         <span
@@ -484,11 +476,11 @@ export function Upload({
           className={cx(
             'flex h-28 w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed text-sm transition-colors',
             dragging
-              ? 'border-adm-violet bg-adm-violet/10 text-adm-text'
-              : 'border-adm-line-strong bg-adm-field text-adm-muted hover:border-adm-violet/60 hover:text-adm-text',
+              ? 'border-adm-accent bg-adm-accent/10 text-adm-text'
+              : 'border-adm-line-strong bg-adm-field text-adm-muted hover:border-adm-accent/60 hover:text-adm-text',
           )}
         >
-          <span className="grid size-9 place-items-center rounded-full bg-adm-violet/15 text-violet-300">
+          <span className="grid size-9 place-items-center rounded-full bg-adm-accent/15 text-adm-accent-soft">
             <Icon className="size-4" />
           </span>
           {busy ? 'Uploading…' : 'Drop a file or click to browse'}
@@ -523,10 +515,10 @@ export function NavRow({
     <button
       type="button"
       onClick={onClick}
-      className="group flex w-full cursor-pointer items-center gap-3 rounded-xl border border-adm-line bg-adm-field px-4 py-3 text-left transition-colors hover:border-adm-violet/50"
+      className="group flex w-full cursor-pointer items-center gap-3 rounded-xl border border-adm-line bg-adm-field px-4 py-3 text-left transition-colors hover:border-adm-accent/50"
     >
       {icon && (
-        <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-adm-violet/15 text-violet-300">{icon}</span>
+        <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-adm-accent/15 text-adm-accent-soft">{icon}</span>
       )}
       <span className="min-w-0 flex-1">
         <span className="block text-sm font-medium">{title}</span>

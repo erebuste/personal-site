@@ -342,8 +342,8 @@ export function TracksPage() {
             {audio.cover ? (
               <img src={audio.cover} alt="" className="size-14 rounded-xl object-cover" />
             ) : (
-              <span className="grid size-14 place-items-center rounded-xl bg-linear-to-br from-adm-violet to-adm-pink">
-                <Music className="size-6 text-white" />
+              <span className="grid size-14 place-items-center rounded-xl bg-adm-accent/15">
+                <Music className="size-6 text-adm-accent-soft" />
               </span>
             )}
             <div className="min-w-0 flex-1">
@@ -367,7 +367,7 @@ export function TracksPage() {
             maxLength={100}
             placeholder="Song name"
             onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-            className="h-10 w-full rounded-lg border border-adm-line bg-adm-field px-3 text-sm outline-none placeholder:text-adm-dim focus:border-adm-violet focus:ring-2 focus:ring-adm-violet/25"
+            className="h-10 w-full rounded-lg border border-adm-line bg-adm-field px-3 text-sm outline-none placeholder:text-adm-dim focus:border-adm-accent focus:ring-2 focus:ring-adm-accent/25"
           />
         </Field>
         <Grid>

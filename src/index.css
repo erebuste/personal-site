@@ -6,17 +6,18 @@
   /* Admin body text: Unbounded is a display face, too wide for dense forms. */
   --font-ui: ui-sans-serif, system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 
-  /* Admin "Midnight Purple" palette: change the scheme here. Used as bg-adm-*, text-adm-*, border-adm-*. */
-  --color-adm-bg: #0b0914;
-  --color-adm-panel: #131024;
-  --color-adm-field: #0f0c1d;
-  --color-adm-line: #231d3d;
-  --color-adm-line-strong: #362c5c;
-  --color-adm-text: #ece9f7;
-  --color-adm-muted: #8a84a6;
-  --color-adm-dim: #5d5778;
-  --color-adm-violet: #8b5cf6;
-  --color-adm-pink: #ec4899;
+  /* Admin palette: neutral dark grays, one flat lilac accent, no gradients. Used as bg-adm-*, text-adm-*, border-adm-*. */
+  --color-adm-bg: #0c0c0e;
+  --color-adm-panel: #141417;
+  --color-adm-field: #101013;
+  --color-adm-line: #26262b;
+  --color-adm-line-strong: #36363d;
+  --color-adm-text: #ececf1;
+  --color-adm-muted: #8e8e99;
+  --color-adm-dim: #5f5f6a;
+  --color-adm-accent: #c4a7f5; /* lilac: fills, borders, focus rings */
+  --color-adm-accent-soft: #dccbfb; /* lighter lilac: text and icons on dark */
+  --color-adm-on-accent: #17121f; /* text on a lilac fill (white on lilac is too low-contrast) */
   --color-adm-danger: #f43f5e;
 
   --animate-twinkle: twinkle 1.8s ease-in-out infinite;
@@ -728,14 +729,15 @@ body {
 .fx-focus { animation: fx-focus 3s ease-in-out infinite; }
 @keyframes fx-focus { 50% { filter: blur(1.5px); opacity: 0.75; } }
 
-/* Admin sliders: gradient-filled track up to --fill (set inline), white thumb with a violet halo. */
+/* Admin sliders: flat lilac track up to --fill (set inline), lilac thumb. The same-color linear-gradient is
+   only a way to paint a solid block of a given width; it has no color transition. */
 .fc-range {
   appearance: none;
   height: 4px;
   border-radius: 9999px;
   cursor: pointer;
   background:
-    linear-gradient(90deg, var(--color-adm-violet), var(--color-adm-pink)) 0 / var(--fill, 0%) 100% no-repeat,
+    linear-gradient(var(--color-adm-accent), var(--color-adm-accent)) 0 / var(--fill, 0%) 100% no-repeat,
     var(--color-adm-line);
 }
 .fc-range::-webkit-slider-thumb {
@@ -743,8 +745,8 @@ body {
   width: 14px;
   height: 14px;
   border-radius: 9999px;
-  background: #fff;
-  box-shadow: 0 0 0 3px rgb(139 92 246 / 0.35);
+  background: var(--color-adm-accent);
+  box-shadow: 0 0 0 3px var(--color-adm-bg);
 }
 .fc-range::-moz-range-track { background: transparent; }
 .fc-range::-moz-range-thumb {
@@ -752,8 +754,8 @@ body {
   height: 14px;
   border: 0;
   border-radius: 9999px;
-  background: #fff;
-  box-shadow: 0 0 0 3px rgb(139 92 246 / 0.35);
+  background: var(--color-adm-accent);
+  box-shadow: 0 0 0 3px var(--color-adm-bg);
 }
 .adm select option { background: var(--color-adm-panel); color: var(--color-adm-text); }
 

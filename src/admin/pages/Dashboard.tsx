@@ -7,7 +7,7 @@ import { Button, NavRow, PageHeader, Section } from '../ui';
 function Stat({ icon, label, value }: { icon: ReactNode; label: string; value: string | number }) {
   return (
     <div className="rounded-2xl border border-adm-line bg-adm-panel p-4">
-      <span className="grid size-8 place-items-center rounded-lg bg-linear-to-br from-adm-violet/25 to-adm-pink/20 text-violet-200">
+      <span className="grid size-8 place-items-center rounded-lg bg-adm-accent/15 text-adm-accent-soft">
         {icon}
       </span>
       <p className="mt-4 text-xs text-adm-muted">{label}</p>
@@ -30,29 +30,19 @@ function ViewsChart({ data }: { data: StatsResponse['lastWeek'] }) {
 
   return (
     <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img" aria-label="Views over the last 7 days">
-      <defs>
-        <linearGradient id="views-line" x1="0" x2="1">
-          <stop offset="0" stopColor="#8b5cf6" />
-          <stop offset="1" stopColor="#ec4899" />
-        </linearGradient>
-        <linearGradient id="views-area" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#8b5cf6" stopOpacity="0.35" />
-          <stop offset="1" stopColor="#8b5cf6" stopOpacity="0" />
-        </linearGradient>
-      </defs>
       {ticks.map((t) => (
         <g key={t}>
-          <line x1={L} x2={W - R} y1={y(t)} y2={y(t)} stroke="#231d3d" strokeDasharray="3 4" />
+          <line x1={L} x2={W - R} y1={y(t)} y2={y(t)} className="stroke-adm-line" strokeDasharray="3 4" />
           <text x={L - 8} y={y(t)} textAnchor="end" dominantBaseline="middle" className="fill-adm-dim text-[9px]">
             {t}
           </text>
         </g>
       ))}
-      <polygon points={area} fill="url(#views-area)" />
-      <polyline points={line} fill="none" stroke="url(#views-line)" strokeWidth={2} strokeLinejoin="round" />
+      <polygon points={area} className="fill-adm-accent/12" />
+      <polyline points={line} fill="none" className="stroke-adm-accent" strokeWidth={2} strokeLinejoin="round" />
       {data.map((d, i) => (
         <g key={d.date}>
-          <circle cx={x(i)} cy={y(d.count)} r={3} fill="#0b0914" stroke="#c4b5fd" strokeWidth={1.5}>
+          <circle cx={x(i)} cy={y(d.count)} r={3} className="fill-adm-bg stroke-adm-accent" strokeWidth={1.5}>
             <title>{`${d.date}: ${d.count} views`}</title>
           </circle>
           <text x={x(i)} y={H - 6} textAnchor="middle" className="fill-adm-dim text-[9px]">
