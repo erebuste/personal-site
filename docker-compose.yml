@@ -1,28 +1,47 @@
-# IMAGE unset: `up --build` builds locally. IMAGE=ghcr.io/<you>/<repo>: `pull` fetches what CI published.
+# Update: docker compose pull && docker compose up -d
 services:
+  # One-shot: Docker creates a missing ./data as root, so hand it to the user the api runs as.
+  init:
+    image: ghcr.io/erebuste/personal-site-api:latest
+    container_name: personal-site-init
+    user: "0"
+    command: sh -c "mkdir -p /data/uploads && chown -R ${UID:-1000}:${GID:-1000} /data"
+    restart: "no"
+    volumes:
+      - ./data:/data
   api:
-    image: ${IMAGE:-personal-site}-api:${TAG:-latest}
-    build: { context: ., target: api }
-    environment:
-      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Set ADMIN_PASSWORD in .env (see .env.example)}
-      SESSION_SECRET: ${SESSION_SECRET:-}
-      COOKIE_SECURE: ${COOKIE_SECURE:-false}
-      DISCORD_BOT_TOKEN: ${DISCORD_BOT_TOKEN:-}
-    volumes:
-      - data:/data
+    image: ghcr.io/erebuste/personal-site-api:latest
+    #image: personal-site-api:local #For testing (docker build --target api -t personal-site-api:local .)
     restart: unless-stopped
+    container_name: personal-site-api
+    user: "${UID:-1000}:${GID:-1000}" # set UID/GID in .env to own ./data as your host user
     # No ports: only reachable through nginx, which is what makes X-Real-IP trustworthy.
-
-  web:
-    image: ${IMAGE:-personal-site}-web:${TAG:-latest}
-    build: { context: ., target: web }
-    ports:
-      - "${WEB_PORT:-3000}:80"
     volumes:
-      - data:/data:ro
+      - ./data:/data
+    env_file:
+      - .env
     depends_on:
-      - api
+      init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:3001/api/session ||
+        exit 1
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  web:
+    image: ghcr.io/erebuste/personal-site-web:latest
+    #image: personal-site-web:local #For testing (docker build --target web -t personal-site-web:local .)
     restart: unless-stopped
-
-volumes:
-  data:
+    container_name: personal-site-web
+    ports:
+      - 172.17.0.1:3000:80 #For production when using reverse proxy
+      #- 3000:80 # For local testing
+    volumes:
+      - ./data:/data:ro # nginx serves /uploads straight from here
+    # No env_file: nginx needs none of it, so the secrets stay out of this container.
+    depends_on:
+      api:
+        condition: service_healthy
+        restart: true
+networks: {}
